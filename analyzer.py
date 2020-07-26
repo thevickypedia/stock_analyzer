@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from fetcher import nasdaq
+import logging
 
 pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
@@ -8,6 +9,9 @@ pd.set_option('display.max_columns', None)
 stocks = nasdaq()
 n = 0
 analysis = ''
+
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(name)s %(levelname)s %(message)s')
 
 for stock in stocks:
     n = n + 1
@@ -20,6 +24,6 @@ for stock in stocks:
         forward_dividend_yield = sheet.iat[5, 1]
         analysis += f'{stock}\nCapital: {market_capital}\nPE Ratio: {pe_ratio}\nYield: {forward_dividend_yield}\n\n'
     else:
-        print(f'Unable to get analysis for {stock}')
+        logging.critical(f'Unable to get analysis for {stock}')
 
 print(f'Total number of stocks analyzed{n}\n\n{analysis}')
