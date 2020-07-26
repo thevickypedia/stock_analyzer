@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from fetcher import nasdaq
 
+pd.set_option('display.max_rows', None)
+pd.set_option('display.max_columns', None)
+
 stocks = nasdaq()
 n = 0
 analysis = ''
