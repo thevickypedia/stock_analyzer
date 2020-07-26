@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from fetcher import nasdaq
 
 stocks = nasdaq()
@@ -10,9 +11,12 @@ for stock in stocks:
     url = f'https://finance.yahoo.com/quote/{stock}/'
 
     sheet = pd.read_html(url, flavor='bs4')[-1]
-    market_capital = sheet.iat[0, 1]
-    pe_ratio = sheet.iat[2, 1]
-    forward_dividend_yield = sheet.iat[5, 1]
-    analysis += f'{stock}\nCapital: {market_capital}\nPE Ratio: {pe_ratio}\nYield: {forward_dividend_yield}\n\n'
+    if 'N/A (N/A)' not in list(sheet[1]) and np.nan not in list(sheet[1]):
+        market_capital = sheet.iat[0, 1]
+        pe_ratio = sheet.iat[2, 1]
+        forward_dividend_yield = sheet.iat[5, 1]
+        analysis += f'{stock}\nCapital: {market_capital}\nPE Ratio: {pe_ratio}\nYield: {forward_dividend_yield}\n\n'
+    else:
+        print(f'Unable to get analysis for {stock}')
 
 print(f'Total number of stocks analyzed{n}\n\n{analysis}')
