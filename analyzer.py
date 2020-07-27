@@ -3,6 +3,7 @@ import numpy as np
 from fetcher import nasdaq
 import logging
 import xlsxwriter
+from urllib.error import HTTPError, URLError
 
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s %(name)s %(levelname)s %(message)s')
@@ -36,7 +37,11 @@ for stock in stocks:
             worksheet.write(n, 3, f'{forward_dividend_yield}')
         else:
             logging.critical(f'Received null values on analysis for {stock}')
-    except:
+    except (IndexError, HTTPError, KeyError, URLError):
         logging.error(f'Unable to analyze {stock}')
+    except KeyboardInterrupt:
+        logging.info('Terminating session and saving the workbook')
+        workbook.close()
+        exit(0)
 
 workbook.close()
