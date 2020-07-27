@@ -6,6 +6,14 @@ import numpy as np
 import pandas as pd
 import xlsxwriter
 
+import os
+logdir = os.path.isdir('logs')
+datadir = os.path.isdir('data')
+if not logdir:
+    os.mkdir('logs')
+if not datadir:
+    os.mkdir('data')
+
 from lib.helper_functions import nasdaq, logger
 
 start_time = time.time()
@@ -64,8 +72,8 @@ class Analyzer:
                 logger.debug(f'Unable to analyze {stock}')
 
             display = (f'\rCurrent status: {i}/{total}\tProgress: [%s%s] %d %%' % (
-            ('-' * int((i * 100 / total) / 100 * 20 - 1) + '>'),
-            (' ' * (20 - len('-' * int((i * 100 / total) / 100 * 20 - 1) + '>'))), (float(i) * 100 / total)))
+                ('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'),
+                (' ' * (30 - len('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'))), (float(i) * 100 / total)))
             sys.stdout.write(display)
             sys.stdout.flush()
 
