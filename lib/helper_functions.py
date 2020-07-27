@@ -2,15 +2,19 @@ import string
 import requests
 from bs4 import BeautifulSoup as bs
 import logging
+from datetime import datetime
 
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s %(name)s %(levelname)s %(message)s')
+log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
+logging.basicConfig(filename=log_filename, level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(message)s')
+logger = logging.getLogger('analyzer.py')
 
 
 def nasdaq():
     char = string.ascii_uppercase
     stock_list = []
-    logging.info('Fetching tickers for all NASDAQ stocks')
+    logger.info('Fetching tickers for all NASDAQ stocks')
+    print('Fetching tickers for all NASDAQ stocks')
     for x in char:
         url = f'http://www.eoddata.com/stocklist/NASDAQ/{x}.htm'
         r = requests.get(url)
