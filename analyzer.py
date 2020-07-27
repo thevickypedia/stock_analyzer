@@ -1,3 +1,4 @@
+import os
 import sys
 import time
 from datetime import datetime
@@ -6,7 +7,6 @@ import numpy as np
 import pandas as pd
 import xlsxwriter
 
-import os
 logdir = os.path.isdir('logs')
 datadir = os.path.isdir('data')
 if not logdir:
@@ -58,15 +58,17 @@ class Analyzer:
                 logger.error('Manual Override: Terminating session and saving the workbook')
                 print('\nManual Override: Terminating session and saving the workbook')
                 self.workbook.close()
-                exec_time = self.time_converter(round(time.time() - start_time))
-                logger.info(f'Total execution time: {exec_time}')
                 logger.info(f'Stocks Analyzed: {n}')
-                print(f'Total execution time: {exec_time}')
+                logger.info(f'Total Stocks looked up: {i}')
                 print(f'Stocks Analyzed: {n}')
+                print(f'Total Stocks looked up: {i}')
                 null = i - n
                 if null:
                     logger.info(f'Stocks with no analyzing data: {null}')
                     print(f'Stocks with no analyzing data: {null}')
+                exec_time = self.time_converter(round(time.time() - start_time))
+                logger.info(f'Total execution time: {exec_time}')
+                print(f'Total execution time: {exec_time}')
                 exit(0)
             except:
                 logger.debug(f'Unable to analyze {stock}')
@@ -97,13 +99,13 @@ class Analyzer:
 if __name__ == '__main__':
     timed_response, analyzed, overall = Analyzer().write()
     time_taken = Analyzer().time_converter(timed_response)
-    logger.info(f'Total execution time: {time_taken}')
     logger.info(f'Stocks Analyzed: {analyzed}')
-    logger.info(f'Stocks looked up: {overall}')
-    print(f'\nTotal execution time: {time_taken}')
+    logger.info(f'Total Stocks looked up: {overall}')
     print(f'Stocks Analyzed: {analyzed}')
-    print(f'Stocks looked up: {overall}')
+    print(f'Total Stocks looked up: {overall}')
     left_overs = overall - analyzed
     if left_overs:
         logger.info(f'Stocks with no analyzing data: {left_overs}')
         print(f'Stocks with no analyzing data: {left_overs}')
+    logger.info(f'Total execution time: {time_taken}')
+    print(f'\nTotal execution time: {time_taken}')
