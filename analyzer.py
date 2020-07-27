@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from lib.helper_functions import nasdaq
-import logging
+from lib.helper_functions import nasdaq, logger
 import xlsxwriter
 import time
 from datetime import datetime
@@ -25,6 +24,7 @@ class Analyzer:
     def write(self):
         n = 0
         logger.info('Initializing Analysis on all NASDAQ stocks')
+        print('Initializing Analysis on all NASDAQ stocks..')
         for stock in self.stocks:
             url = f'https://finance.yahoo.com/quote/{stock}/'
             try:
@@ -39,10 +39,16 @@ class Analyzer:
                     self.worksheet.write(n, 2, f'{pe_ratio}')
                     self.worksheet.write(n, 3, f'{forward_dividend_yield}')
                 else:
-                    logger.warning(f'Received null values on analysis for {stock}')
+                    logger.warning(f'Received null values for analysis on {stock}')
             except KeyboardInterrupt:
-                logger.error('Terminating session and saving the workbook')
+                logger.error('Manual Override: Terminating session and saving the workbook')
+                print('Manual Override: Terminating session and saving the workbook')
                 self.workbook.close()
+                exec_time = Analyzer().time_converter(round(time.time() - start_time))
+                logger.info(f'Total execution time: {exec_time}')
+                logger.info(f'Stocks Analyzed: {n}')
+                print(f'Total execution time: {exec_time}')
+                print(f'Stocks Analyzed: {n}')
                 exit(0)
             except:
                 logger.debug(f'Unable to analyze {stock}')
@@ -65,11 +71,9 @@ class Analyzer:
 
 
 if __name__ == '__main__':
-    log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
-    logging.basicConfig(filename=log_filename, level=logging.INFO,
-                        format='%(asctime)s %(levelname)s %(message)s')
-    logger = logging.getLogger('analyzer.py')
     timed_response, no = Analyzer().write()
     time_taken = Analyzer().time_converter(timed_response)
     logger.info(f'Total execution time: {time_taken}')
     logger.info(f'Stocks Analyzed: {no}')
+    print(f'Total execution time: {time_taken}')
+    print(f'Stocks Analyzed: {no}')
