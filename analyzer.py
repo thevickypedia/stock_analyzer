@@ -1,18 +1,21 @@
 import pandas as pd
 import numpy as np
-from fetcher import nasdaq
+from lib.helper_functions import nasdaq
 import logging
 import xlsxwriter
+import time
+from datetime import datetime
+
+start_time = time.time()
 
 
 class Analyzer:
     def __init__(self):
-        logging.basicConfig(level=logging.INFO,
-                            format='%(asctime)s %(name)s %(levelname)s %(message)s')
         pd.set_option('display.max_rows', None)
         pd.set_option('display.max_columns', None)
         self.stocks = nasdaq()
-        self.workbook = xlsxwriter.Workbook('stocks.xlsx')
+        filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')
+        self.workbook = xlsxwriter.Workbook(filename)
         self.worksheet = self.workbook.add_worksheet('Results')
         self.worksheet.write(0, 0, "Stock Ticker")
         self.worksheet.write(0, 1, "Capital")
@@ -21,7 +24,7 @@ class Analyzer:
 
     def write(self):
         n = 0
-        logging.info('Initializing Analysis on all NASDAQ stocks')
+        logger.info('Initializing Analysis on all NASDAQ stocks')
         for stock in self.stocks:
             url = f'https://finance.yahoo.com/quote/{stock}/'
             try:
@@ -36,16 +39,37 @@ class Analyzer:
                     self.worksheet.write(n, 2, f'{pe_ratio}')
                     self.worksheet.write(n, 3, f'{forward_dividend_yield}')
                 else:
-                    logging.warning(f'Received null values on analysis for {stock}')
+                    logger.warning(f'Received null values on analysis for {stock}')
             except KeyboardInterrupt:
-                logging.error('Terminating session and saving the workbook')
+                logger.error('Terminating session and saving the workbook')
                 self.workbook.close()
                 exit(0)
             except:
-                logging.debug(f'Unable to analyze {stock}')
+                logger.debug(f'Unable to analyze {stock}')
 
         self.workbook.close()
+        return round(time.time() - start_time), n
+
+    def time_converter(self, seconds):
+        seconds = seconds % (24 * 3600)
+        hour = seconds // 3600
+        seconds %= 3600
+        minutes = seconds // 60
+        seconds %= 60
+        if hour:
+            return f'{hour} hours {minutes} minutes {seconds} seconds'
+        elif minutes:
+            return f'{minutes} minutes {seconds} seconds'
+        elif seconds:
+            return f'{seconds} seconds'
 
 
 if __name__ == '__main__':
-    Analyzer().write()
+    log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
+    logging.basicConfig(filename=log_filename, level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(message)s')
+    logger = logging.getLogger('analyzer.py')
+    timed_response, no = Analyzer().write()
+    time_taken = Analyzer().time_converter(timed_response)
+    logger.info(f'Total execution time: {time_taken}')
+    logger.info(f'Stocks Analyzed: {no}')
