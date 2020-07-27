@@ -44,7 +44,7 @@ class Analyzer:
                 logger.error('Manual Override: Terminating session and saving the workbook')
                 print('Manual Override: Terminating session and saving the workbook')
                 self.workbook.close()
-                exec_time = Analyzer().time_converter(round(time.time() - start_time))
+                exec_time = self.time_converter(round(time.time() - start_time))
                 logger.info(f'Total execution time: {exec_time}')
                 logger.info(f'Stocks Analyzed: {n}')
                 print(f'Total execution time: {exec_time}')
