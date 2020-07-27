@@ -1,9 +1,12 @@
-import pandas as pd
-import numpy as np
-from lib.helper_functions import nasdaq, logger
-import xlsxwriter
+import sys
 import time
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
+import xlsxwriter
+
+from lib.helper_functions import nasdaq, logger
 
 start_time = time.time()
 
@@ -23,10 +26,13 @@ class Analyzer:
 
     def write(self):
         n = 0
+        i = 0
+        total = len(self.stocks)
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
         for stock in self.stocks:
             url = f'https://finance.yahoo.com/quote/{stock}/'
+            i = i + 1
             try:
                 sheet = pd.read_html(url, flavor='bs4')[-1]
                 if 'N/A (N/A)' not in list(sheet[1]) and np.nan not in list(sheet[1]):
@@ -42,19 +48,29 @@ class Analyzer:
                     logger.warning(f'Received null values for analysis on {stock}')
             except KeyboardInterrupt:
                 logger.error('Manual Override: Terminating session and saving the workbook')
-                print('Manual Override: Terminating session and saving the workbook')
+                print('\nManual Override: Terminating session and saving the workbook')
                 self.workbook.close()
                 exec_time = self.time_converter(round(time.time() - start_time))
                 logger.info(f'Total execution time: {exec_time}')
                 logger.info(f'Stocks Analyzed: {n}')
                 print(f'Total execution time: {exec_time}')
                 print(f'Stocks Analyzed: {n}')
+                null = i - n
+                if null:
+                    logger.info(f'Stocks with no analyzing data: {null}')
+                    print(f'Stocks with no analyzing data: {null}')
                 exit(0)
             except:
                 logger.debug(f'Unable to analyze {stock}')
 
+            display = (f'\rCurrent status: {i}/{total}\tProgress: [%s%s] %d %%' % (
+            ('-' * int((i * 100 / total) / 100 * 20 - 1) + '>'),
+            (' ' * (20 - len('-' * int((i * 100 / total) / 100 * 20 - 1) + '>'))), (float(i) * 100 / total)))
+            sys.stdout.write(display)
+            sys.stdout.flush()
+
         self.workbook.close()
-        return round(time.time() - start_time), n
+        return round(time.time() - start_time), n, i
 
     def time_converter(self, seconds):
         seconds = seconds % (24 * 3600)
@@ -71,9 +87,15 @@ class Analyzer:
 
 
 if __name__ == '__main__':
-    timed_response, no = Analyzer().write()
+    timed_response, analyzed, overall = Analyzer().write()
     time_taken = Analyzer().time_converter(timed_response)
     logger.info(f'Total execution time: {time_taken}')
-    logger.info(f'Stocks Analyzed: {no}')
-    print(f'Total execution time: {time_taken}')
-    print(f'Stocks Analyzed: {no}')
+    logger.info(f'Stocks Analyzed: {analyzed}')
+    logger.info(f'Stocks looked up: {overall}')
+    print(f'\nTotal execution time: {time_taken}')
+    print(f'Stocks Analyzed: {analyzed}')
+    print(f'Stocks looked up: {overall}')
+    left_overs = overall - analyzed
+    if left_overs:
+        logger.info(f'Stocks with no analyzing data: {left_overs}')
+        print(f'Stocks with no analyzing data: {left_overs}')
