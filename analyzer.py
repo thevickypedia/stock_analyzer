@@ -1,11 +1,12 @@
 import os
-import sys
+# import sys
 import time
 from datetime import datetime
 
 import numpy as np
 import pandas as pd
 import xlsxwriter
+from tqdm import tqdm
 
 logdir = os.path.isdir('logs')
 datadir = os.path.isdir('data')
@@ -34,10 +35,10 @@ class Analyzer:
     def write(self):
         n = 0
         i = 0
-        total = len(stocks)
+        # total = len(stocks)
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
-        for stock in stocks:
+        for stock in tqdm(stocks, desc='Analyzing Stocks', unit='stock', leave=False):
             url = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
             try:
@@ -72,11 +73,11 @@ class Analyzer:
             except:
                 logger.debug(f'Unable to analyze {stock}')
 
-            display = (f'\rCurrent status: {i}/{total}\tProgress: [%s%s] %d %%' % (
-                ('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'),
-                (' ' * (30 - len('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'))), (float(i) * 100 / total)))
-            sys.stdout.write(display)
-            sys.stdout.flush()
+            # display = (f'\rCurrent status: {i}/{total}\tProgress: [%s%s] %d %%' % (
+            #     ('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'),
+            #     (' ' * (30 - len('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'))), (float(i) * 100 / total)))
+            # sys.stdout.write(display)
+            # sys.stdout.flush()
 
         self.workbook.close()
         return round(time.time() - start_time), n, i
