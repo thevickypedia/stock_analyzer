@@ -1,8 +1,9 @@
+import logging
 import string
+from datetime import datetime
+
 import requests
 from bs4 import BeautifulSoup as bs
-import logging
-from datetime import datetime
 
 log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
 logging.basicConfig(filename=log_filename, level=logging.INFO,
@@ -31,4 +32,5 @@ def nasdaq():
 
 if __name__ == '__main__':
     from pprint import pprint
+
     pprint(nasdaq())
