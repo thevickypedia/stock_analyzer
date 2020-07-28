@@ -3,7 +3,6 @@ import os
 import time
 from datetime import datetime
 
-import numpy as np
 import pandas as pd
 import xlsxwriter
 from tqdm import tqdm
@@ -31,6 +30,7 @@ class Analyzer:
         self.worksheet.write(0, 1, "Capital")
         self.worksheet.write(0, 2, "PE Ratio")
         self.worksheet.write(0, 3, "Yield")
+        self.worksheet.write(0, 4, "Price Range")
 
     def write(self):
         n = 0
@@ -42,18 +42,17 @@ class Analyzer:
             url = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
             try:
-                sheet = pd.read_html(url, flavor='bs4')[-1]
-                if 'N/A (N/A)' not in list(sheet[1]) and np.nan not in list(sheet[1]):
-                    n = n + 1
-                    market_capital = sheet.iat[0, 1]
-                    pe_ratio = sheet.iat[2, 1]
-                    forward_dividend_yield = sheet.iat[5, 1]
-                    self.worksheet.write(n, 0, f'{stock}')
-                    self.worksheet.write(n, 1, f'{market_capital}')
-                    self.worksheet.write(n, 2, f'{pe_ratio}')
-                    self.worksheet.write(n, 3, f'{forward_dividend_yield}')
-                else:
-                    logger.warning(f'Received null values for analysis on {stock}')
+                result = pd.read_html(url, flavor='bs4')
+                n = n + 1
+                market_capital = result[-1].iat[0, 1]
+                pe_ratio = result[-1].iat[2, 1]
+                forward_dividend_yield = result[-1].iat[5, 1]
+                price_range = result[0].iat[4, 1]
+                self.worksheet.write(n, 0, f'{stock}')
+                self.worksheet.write(n, 1, f'{market_capital}')
+                self.worksheet.write(n, 2, f'{pe_ratio}')
+                self.worksheet.write(n, 3, f'{forward_dividend_yield}')
+                self.worksheet.write(n, 4, f'{price_range}')
             except KeyboardInterrupt:
                 logger.error('Manual Override: Terminating session and saving the workbook')
                 print('\nManual Override: Terminating session and saving the workbook')
