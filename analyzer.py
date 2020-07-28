@@ -23,7 +23,6 @@ class Analyzer:
     def __init__(self):
         pd.set_option('display.max_rows', None)
         pd.set_option('display.max_columns', None)
-        self.stocks = nasdaq()
         filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')
         self.workbook = xlsxwriter.Workbook(filename)
         self.worksheet = self.workbook.add_worksheet('Results')
@@ -35,10 +34,10 @@ class Analyzer:
     def write(self):
         n = 0
         i = 0
-        total = len(self.stocks)
+        total = len(stocks)
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
-        for stock in self.stocks:
+        for stock in stocks:
             url = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
             try:
@@ -97,15 +96,16 @@ class Analyzer:
 
 
 if __name__ == '__main__':
+    stocks = nasdaq()
     timed_response, analyzed, overall = Analyzer().write()
     time_taken = Analyzer().time_converter(timed_response)
     logger.info(f'Stocks Analyzed: {analyzed}')
     logger.info(f'Total Stocks looked up: {overall}')
-    print(f'Stocks Analyzed: {analyzed}')
+    print(f'\nStocks Analyzed: {analyzed}')
     print(f'Total Stocks looked up: {overall}')
     left_overs = overall - analyzed
     if left_overs:
         logger.info(f'Stocks with no analyzing data: {left_overs}')
         print(f'Stocks with no analyzing data: {left_overs}')
     logger.info(f'Total execution time: {time_taken}')
-    print(f'\nTotal execution time: {time_taken}')
+    print(f'Total execution time: {time_taken}')
