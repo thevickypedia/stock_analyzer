@@ -30,7 +30,6 @@ class Analyzer:
         self.worksheet.write(0, 1, "Capital")
         self.worksheet.write(0, 2, "PE Ratio")
         self.worksheet.write(0, 3, "Yield")
-        self.worksheet.write(0, 4, "Price Range")
 
     def write(self):
         n = 0
@@ -39,20 +38,18 @@ class Analyzer:
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
         for stock in tqdm(stocks, desc='Analyzing Stocks', unit='stock', leave=False):
-            url = f'https://finance.yahoo.com/quote/{stock}/'
+            summary = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
             try:
-                result = pd.read_html(url, flavor='bs4')
+                summary_result = pd.read_html(summary, flavor='bs4')
+                market_capital = summary_result[-1].iat[0, 1]
+                pe_ratio = summary_result[-1].iat[2, 1]
+                forward_dividend_yield = summary_result[-1].iat[5, 1]
                 n = n + 1
-                market_capital = result[-1].iat[0, 1]
-                pe_ratio = result[-1].iat[2, 1]
-                forward_dividend_yield = result[-1].iat[5, 1]
-                price_range = result[0].iat[4, 1]
                 self.worksheet.write(n, 0, f'{stock}')
                 self.worksheet.write(n, 1, f'{market_capital}')
                 self.worksheet.write(n, 2, f'{pe_ratio}')
                 self.worksheet.write(n, 3, f'{forward_dividend_yield}')
-                self.worksheet.write(n, 4, f'{price_range}')
             except KeyboardInterrupt:
                 logger.error('Manual Override: Terminating session and saving the workbook')
                 print('\nManual Override: Terminating session and saving the workbook')
@@ -63,8 +60,8 @@ class Analyzer:
                 print(f'Total Stocks looked up: {i}')
                 null = i - n
                 if null:
-                    logger.info(f'Stocks with no analyzing data: {null}')
-                    print(f'Stocks with no analyzing data: {null}')
+                    logger.info(f'Number of stocks failed to analyze: {null}')
+                    print(f'Number of stocks failed to analyze: {null}')
                 exec_time = self.time_converter(round(time.time() - start_time))
                 logger.info(f'Total execution time: {exec_time}')
                 print(f'Total execution time: {exec_time}')
@@ -105,7 +102,7 @@ if __name__ == '__main__':
     print(f'Total Stocks looked up: {overall}')
     left_overs = overall - analyzed
     if left_overs:
-        logger.info(f'Stocks with no analyzing data: {left_overs}')
-        print(f'Stocks with no analyzing data: {left_overs}')
+        logger.info(f'Number of stocks failed to analyze: {left_overs}')
+        print(f'Number of stocks failed to analyze: {left_overs}')
     logger.info(f'Total execution time: {time_taken}')
     print(f'Total execution time: {time_taken}')
