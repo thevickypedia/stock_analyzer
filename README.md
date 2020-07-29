@@ -1,5 +1,11 @@
 # Stock Analyzer
-Analyze all NASDAQ stocks using web scrapping on [Yahoo Finance](https://finance.yahoo.com)
+Analyze all NASDAQ stocks using [Yahoo Finance](https://finance.yahoo.com)
+
+### Libraries Used:
+- Pandas
+- BeautifulSoup
+- Numpy
+
 
 ## License & copyright
 
