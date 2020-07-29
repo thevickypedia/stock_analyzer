@@ -2,11 +2,11 @@ import os
 # import sys
 import time
 from datetime import datetime
-import requests
-from bs4 import BeautifulSoup as bs
 
 import pandas as pd
+import requests
 import xlsxwriter
+from bs4 import BeautifulSoup as bs
 from tqdm import tqdm
 
 logdir = os.path.isdir('logs')
@@ -34,6 +34,14 @@ class Analyzer:
         self.worksheet.write(0, 2, "PE Ratio")
         self.worksheet.write(0, 3, "Yield")
         self.worksheet.write(0, 4, "Current Price")
+        self.worksheet.write(0, 5, "52 Week High")
+        self.worksheet.write(0, 6, "52 Week Low")
+        self.worksheet.write(0, 7, "Profit Margin")
+        self.worksheet.write(0, 8, "Price Book Ratio")
+        self.worksheet.write(0, 9, "Return on Equity")
+        self.worksheet.write(0, 10, f"{current_year + 1} Analysis")
+        self.worksheet.write(0, 11, f"{current_year} - {current_year + 5} Analysis")
+        self.worksheet.write(0, 12, f"{current_year - 5} - {current_year} Analysis")
 
     def write(self):
         n = 0
@@ -42,18 +50,31 @@ class Analyzer:
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
         for stock in tqdm(stocks, desc='Analyzing Stocks', unit='stock', leave=False):
-            summary = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
+            summary = f'https://finance.yahoo.com/quote/{stock}/'
+            stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics'
+            analysis = f'https://finance.yahoo.com/quote/{stock}/analysis'
+            r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
+            scrapped = bs(r.text, "html.parser")
+            raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
+            price = float(raw_data.find('span').text)
             try:
-                r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
-                scrapped = bs(r.text, "html.parser")
-                raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
-                price = float(raw_data.find('span').text)
-
                 summary_result = pd.read_html(summary, flavor='bs4')
                 market_capital = summary_result[-1].iat[0, 1]
                 pe_ratio = summary_result[-1].iat[2, 1]
                 forward_dividend_yield = summary_result[-1].iat[5, 1]
+
+                stats_result = pd.read_html(stats, flavor='bs4')
+                high = stats_result[0].iat[3, 1]
+                low = stats_result[0].iat[4, 1]
+                profit_margin = stats_result[5].iat[0, 1]
+                price_book_ratio = stats_result[0].iat[6, 1]
+                return_on_equity = stats_result[6].iat[1, 1]
+
+                analysis_result = pd.read_html(analysis, flavor='bs4')
+                analysis_next_year = analysis_result[-1].iat[3, 1]
+                analysis_next_5_years = analysis_result[-1].iat[4, 1]
+                analysis_past_5_years = analysis_result[-1].iat[5, 1]
 
                 n = n + 1
 
@@ -63,6 +84,16 @@ class Analyzer:
                 self.worksheet.write(n, 3, f'{forward_dividend_yield}')
 
                 self.worksheet.write(n, 4, f'{price}')
+
+                self.worksheet.write(n, 5, f'{high}')
+                self.worksheet.write(n, 6, f'{low}')
+                self.worksheet.write(n, 7, f'{profit_margin}')
+                self.worksheet.write(n, 8, f'{price_book_ratio}')
+                self.worksheet.write(n, 9, f'{return_on_equity}')
+
+                self.worksheet.write(n, 10, f'{analysis_next_year}')
+                self.worksheet.write(n, 11, f'{analysis_next_5_years}')
+                self.worksheet.write(n, 12, f'{analysis_past_5_years}')
 
             except KeyboardInterrupt:
                 logger.error('Manual Override: Terminating session and saving the workbook')
