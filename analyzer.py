@@ -55,14 +55,15 @@ class Analyzer:
             stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics'
             analysis = f'https://finance.yahoo.com/quote/{stock}/analysis'
             r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
-            scrapped = bs(r.text, "html.parser")
-            raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
-            price = float(raw_data.find('span').text)
             try:
                 summary_result = pd.read_html(summary, flavor='bs4')
                 market_capital = summary_result[-1].iat[0, 1]
                 pe_ratio = summary_result[-1].iat[2, 1]
                 forward_dividend_yield = summary_result[-1].iat[5, 1]
+
+                scrapped = bs(r.text, "html.parser")
+                raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
+                price = float(raw_data.find('span').text)
 
                 stats_result = pd.read_html(stats, flavor='bs4')
                 high = stats_result[0].iat[3, 1]
