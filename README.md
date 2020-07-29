@@ -1,5 +1,5 @@
 # Stock Analyzer
-Analyze all NASDAQ stocks using [Yahoo Finance](https://finance.yahoo.com)
+Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using Pandas
 
 ### Libraries Used:
 - Pandas
