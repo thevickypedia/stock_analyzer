@@ -2,6 +2,8 @@ import os
 # import sys
 import time
 from datetime import datetime
+import requests
+from bs4 import BeautifulSoup as bs
 
 import pandas as pd
 import xlsxwriter
@@ -17,6 +19,7 @@ if not datadir:
 from lib.helper_functions import nasdaq, logger
 
 start_time = time.time()
+current_year = int(datetime.today().year)
 
 
 class Analyzer:
@@ -30,6 +33,7 @@ class Analyzer:
         self.worksheet.write(0, 1, "Capital")
         self.worksheet.write(0, 2, "PE Ratio")
         self.worksheet.write(0, 3, "Yield")
+        self.worksheet.write(0, 4, "Current Price")
 
     def write(self):
         n = 0
@@ -41,15 +45,25 @@ class Analyzer:
             summary = f'https://finance.yahoo.com/quote/{stock}/'
             i = i + 1
             try:
+                r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
+                scrapped = bs(r.text, "html.parser")
+                raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
+                price = float(raw_data.find('span').text)
+
                 summary_result = pd.read_html(summary, flavor='bs4')
                 market_capital = summary_result[-1].iat[0, 1]
                 pe_ratio = summary_result[-1].iat[2, 1]
                 forward_dividend_yield = summary_result[-1].iat[5, 1]
+
                 n = n + 1
+
                 self.worksheet.write(n, 0, f'{stock}')
                 self.worksheet.write(n, 1, f'{market_capital}')
                 self.worksheet.write(n, 2, f'{pe_ratio}')
                 self.worksheet.write(n, 3, f'{forward_dividend_yield}')
+
+                self.worksheet.write(n, 4, f'{price}')
+
             except KeyboardInterrupt:
                 logger.error('Manual Override: Terminating session and saving the workbook')
                 print('\nManual Override: Terminating session and saving the workbook')
