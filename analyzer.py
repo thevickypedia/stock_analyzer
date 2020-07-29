@@ -2,11 +2,11 @@ import os
 # import sys
 import time
 from datetime import datetime
-import requests
-from bs4 import BeautifulSoup as bs
 
 import pandas as pd
+import requests
 import xlsxwriter
+from bs4 import BeautifulSoup as bs
 from tqdm import tqdm
 
 logdir = os.path.isdir('logs')
@@ -50,16 +50,15 @@ class Analyzer:
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
         for stock in tqdm(stocks, desc='Analyzing Stocks', unit='stock', leave=False):
+            i = i + 1
             summary = f'https://finance.yahoo.com/quote/{stock}/'
             stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics'
             analysis = f'https://finance.yahoo.com/quote/{stock}/analysis'
-            i = i + 1
+            r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
+            scrapped = bs(r.text, "html.parser")
+            raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
+            price = float(raw_data.find('span').text)
             try:
-                r = requests.get(f'https://finance.yahoo.com/quote/{stock}')
-                scrapped = bs(r.text, "html.parser")
-                raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
-                price = float(raw_data.find('span').text)
-
                 summary_result = pd.read_html(summary, flavor='bs4')
                 market_capital = summary_result[-1].iat[0, 1]
                 pe_ratio = summary_result[-1].iat[2, 1]
