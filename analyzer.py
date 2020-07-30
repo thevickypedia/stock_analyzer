@@ -50,12 +50,13 @@ class Analyzer:
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
         for stock in tqdm(stocks, desc='Analyzing Stocks', unit='stock', leave=False):
-            i = i + 1
-            summary = f'https://finance.yahoo.com/quote/{stock}/'
-            stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics/'
-            analysis = f'https://finance.yahoo.com/quote/{stock}/analysis/'
-            r = requests.get(f'https://finance.yahoo.com/quote/{stock}/')
             try:
+                i = i + 1
+                summary = f'https://finance.yahoo.com/quote/{stock}/'
+                stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics/'
+                analysis = f'https://finance.yahoo.com/quote/{stock}/analysis/'
+                r = requests.get(f'https://finance.yahoo.com/quote/{stock}/')
+
                 summary_result = pd.read_html(summary, flavor='bs4')
                 market_capital = summary_result[-1].iat[0, 1]
                 pe_ratio = summary_result[-1].iat[2, 1]
