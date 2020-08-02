@@ -1,7 +1,7 @@
 import os
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from datetime import datetime
 
 import pandas as pd
@@ -9,7 +9,7 @@ import requests
 import xlsxwriter
 from bs4 import BeautifulSoup as bs
 
-# import threading
+import threading
 
 # from tqdm import tqdm
 
@@ -116,8 +116,8 @@ def launcher(stocks):
         except:
             logger.debug(f'Unable to analyze {stock}')
 
-        # print(f'Task Executed by {threading.current_thread()}')
-        display = (f'\rCurrent status: {i}/{total}\tProgress: [%s%s] %d %%' % (
+        # thread = str(threading.current_thread())
+        display = (f'\rAnalysing: {i}/{total} stocks\tCurrent Progress: [%s%s] %d %%' % (
             ('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'),
             (' ' * (30 - len('-' * int((i * 100 / total) / 100 * 30 - 1) + '>'))), (float(i) * 100 / total)))
         sys.stdout.write(display)
@@ -144,7 +144,8 @@ def worker():
     try:
         logger.info('Initializing Analysis on all NASDAQ stocks')
         print('Initializing Analysis on all NASDAQ stocks..')
-        executor = ThreadPoolExecutor(max_workers=120)
+        executor = ThreadPoolExecutor(max_workers=50)
+        # executor = ProcessPoolExecutor(max_workers=50)
         tasks = executor.submit(launcher, stocks)
 
         output1, output2 = tasks.result()
@@ -153,7 +154,10 @@ def worker():
     except KeyboardInterrupt:
         workbook.close()
         print('\nManual Interruption')
-        sys.exit(0)
+        half_time = time_converter(round(time.time() - start_time))
+        logger.info(f'Total execution time: {half_time}')
+        print(f'Total execution time: {half_time}')
+        exit(0)
 
 
 if __name__ == '__main__':
