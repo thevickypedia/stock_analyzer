@@ -1,7 +1,10 @@
 import os
+import sys
 import time
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from urllib.error import HTTPError
 
 import pandas as pd
 import requests
@@ -37,6 +40,7 @@ def worksheet_initializer():
 
 def analyzer(stock):
     np = 0
+    retries = 0
     try:
         summary = f'https://finance.yahoo.com/quote/{stock}/'
         stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics/'
@@ -67,11 +71,19 @@ def analyzer(stock):
                  price_book_ratio, return_on_equity, analysis_next_year, analysis_next_5_years, \
                  analysis_past_5_years
         stock_map.update({stock: result})
-    except:
-        np = np + 1
+    except (ValueError, IndexError):
+        np += 1
         logger.info(f'Unable to analyze {stock}')
         pass
-    return np
+    except HTTPError:
+        retries += 1
+        wait = retries * 30
+        time.sleep(wait)
+    except:
+        print('Unhandled Exception, Saving spreadsheet. See stacktrace below:\n')
+        print(traceback.print_exc(file=sys.stdout))
+        exit(1)
+    return np, retries
 
 
 def writer():
@@ -122,14 +134,27 @@ if __name__ == '__main__':
     with ThreadPoolExecutor(max_workers=50) as executor:
         output = list(
             tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
-    unprocessed = sum(output)
+
+    unprocessed = 0
+    retry = 0
+    for ele in output:
+        unprocessed += (ele[0])
+        retry += (ele[-1])
+
     analyzed = overall - unprocessed
     logger.info(f'Total Stocks looked up: {overall}')
     print(f'Total Stocks looked up: {overall}')
     logger.info(f'Stocks Analyzed: {analyzed}')
     print(f'Stocks Analyzed: {analyzed}')
+
     if unprocessed:
         print(f'Number of stocks failed to analyze: {unprocessed}')
+        logger.info(f'Number of stocks failed to analyze: {unprocessed}')
+
+    if retry:
+        print(f'Retry count: {retry}')
+        logger.info(f'Retry count: {retry}')
+
     writer()
     time_taken = time_converter(round(time.perf_counter()))
     logger.info(f'Total execution time: {time_taken}')
