@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import traceback
+import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from urllib.error import HTTPError
@@ -79,11 +80,56 @@ def analyzer(stock):
         retries += 1
         wait = retries * 30
         time.sleep(wait)
+        ct = (str(threading.current_thread()))
+        thread = (''.join([t for t in ct if t.isdigit()]))
+        logger.info(f'WARNING: Waiting for {wait} secs for thread: {thread} on {stock}')
+        stuck_thread.append(stock)
     except:
-        print('Unhandled Exception, Saving spreadsheet. See stacktrace below:\n')
-        print(traceback.print_exc(file=sys.stdout))
+        print(f'ERROR: Unhandled Exception, Saving spreadsheet. See stacktrace below:\n'
+              f'{traceback.print_exc(file=sys.stdout)}')
+        writer()
         exit(1)
     return np, retries
+
+
+def reprocess_threads():
+    tnp = 0
+    for pending in tqdm(stuck_thread, total=st_stocks, desc='Retrying Analysis', unit='stock', leave=True):
+        try:
+            summary = f'https://finance.yahoo.com/quote/{pending}/'
+            stats = f'https://finance.yahoo.com/quote/{pending}/key-statistics/'
+            analysis = f'https://finance.yahoo.com/quote/{pending}/analysis/'
+            r = requests.get(f'https://finance.yahoo.com/quote/{pending}/')
+
+            summary_result = pd.read_html(summary, flavor='bs4')
+            market_capital = summary_result[-1].iat[0, 1]
+            pe_ratio = summary_result[-1].iat[2, 1]
+            forward_dividend_yield = summary_result[-1].iat[5, 1]
+
+            scrapped = bs(r.text, "html.parser")
+            raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
+            price = float(raw_data.find('span').text)
+
+            stats_result = pd.read_html(stats, flavor='bs4')
+            high = stats_result[0].iat[3, 1]
+            low = stats_result[0].iat[4, 1]
+            profit_margin = stats_result[5].iat[0, 1]
+            price_book_ratio = stats_result[0].iat[6, 1]
+            return_on_equity = stats_result[6].iat[1, 1]
+
+            analysis_result = pd.read_html(analysis, flavor='bs4')
+            analysis_next_year = analysis_result[-1].iat[3, 1]
+            analysis_next_5_years = analysis_result[-1].iat[4, 1]
+            analysis_past_5_years = analysis_result[-1].iat[5, 1]
+            result = market_capital, pe_ratio, forward_dividend_yield, price, high, low, profit_margin, \
+                     price_book_ratio, return_on_equity, analysis_next_year, analysis_next_5_years, \
+                     analysis_past_5_years
+            stock_map.update({pending: result})
+        except (ValueError, IndexError, HTTPError):
+            tnp += 1
+            logger.info(f'RETRY: Unable to analyze {pending}')
+            pass
+    return tnp
 
 
 def writer():
@@ -127,21 +173,35 @@ if __name__ == '__main__':
     current_year = int(datetime.today().year)
     worksheet_initializer()
     stock_map = {}
+    stuck_thread = []
     stocks = nasdaq()
     overall = len(stocks)
     logger.info('Threading initialized to analyze all NASDAQ stocks')
     print('Threading initialized to analyze all NASDAQ stocks')
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=45) as executor:
         output = list(
             tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
 
-    unprocessed = 0
-    retry = 0
+    initial_analyzed = len(stock_map)
+
+    retry, initial_unprocessed = 0, 0
     for ele in output:
-        unprocessed += (ele[0])
+        initial_unprocessed += (ele[0])
         retry += (ele[-1])
 
-    analyzed = overall - unprocessed
+    st_stocks = len(stuck_thread)
+    retry_unprocessed = 0
+    if st_stocks:
+        logger.info(f'Retrying {st_stocks} stocks that were not processed due to stuck threads.')
+        print(f'\nRetrying {st_stocks} stocks that were not processed due to stuck threads.')
+        retry_unprocessed = reprocess_threads()
+
+    writer()
+
+    analyzed = len(stock_map)
+
+    unprocessed = initial_unprocessed + retry_unprocessed
+
     logger.info(f'Total Stocks looked up: {overall}')
     print(f'Total Stocks looked up: {overall}')
     logger.info(f'Stocks Analyzed: {analyzed}')
@@ -155,7 +215,11 @@ if __name__ == '__main__':
         print(f'Retry count: {retry}')
         logger.info(f'Retry count: {retry}')
 
-    writer()
+    retry_processed = analyzed - initial_analyzed
+    if retry_processed:
+        logger.info(f'Number of stocks re-processed: {retry_processed}')
+        print(f'Number of stocks re-processed: {retry_processed}')
+
     time_taken = time_converter(round(time.perf_counter()))
     logger.info(f'Total execution time: {time_taken}')
     print(f'Total execution time: {time_taken}')
