@@ -1,0 +1,6 @@
+pandas
+bs4
+tqdm
+xlsxwriter
+requests
+html5lib
