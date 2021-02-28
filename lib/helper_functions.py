@@ -1,9 +1,13 @@
 import logging
+import os
 import string
 from datetime import datetime
 
 import requests
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
+
+if 'logs' not in os.listdir():
+    os.mkdir('logs')
 
 log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
 logging.basicConfig(filename=log_filename, level=logging.INFO,
@@ -19,7 +23,7 @@ def nasdaq():
     for x in char:
         url = f'http://www.eoddata.com/stocklist/NASDAQ/{x}.htm'
         r = requests.get(url)
-        scrapped = bs(r.text, "html.parser")
+        scrapped = BeautifulSoup(r.text, "html.parser")
         d1 = scrapped.find_all('tr', {'class': 'ro'})
         d2 = scrapped.find_all('tr', {'class': 're'})
         for link in d1:

@@ -1,17 +1,19 @@
 import os
 import sys
+import threading
 import time
 import traceback
-import threading
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from urllib.error import HTTPError
 
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup as bs
+from bs4 import BeautifulSoup
 from tqdm import tqdm
-from xlsxwriter import Workbook as wb
+from xlsxwriter import Workbook
+
+from lib.helper_functions import nasdaq, logger
 
 log_dir = os.path.isdir('logs')
 data_dir = os.path.isdir('data')
@@ -19,8 +21,6 @@ if not log_dir:
     os.mkdir('logs')
 if not data_dir:
     os.mkdir('data')
-
-from lib.helper_functions import nasdaq, logger
 
 
 def worksheet_initializer():
@@ -42,18 +42,19 @@ def worksheet_initializer():
 def analyzer(stock):
     np = 0
     retries = 0
+    # noinspection PyBroadException
     try:
-        summary = f'https://finance.yahoo.com/quote/{stock}/'
-        stats = f'https://finance.yahoo.com/quote/{stock}/key-statistics/'
-        analysis = f'https://finance.yahoo.com/quote/{stock}/analysis/'
-        r = requests.get(f'https://finance.yahoo.com/quote/{stock}/')
+        summary = f'{BASE_URL}/{stock}/'
+        stats = f'{BASE_URL}/{stock}/key-statistics/'
+        analysis = f'{BASE_URL}/{stock}/analysis/'
+        r = requests.get(f'{BASE_URL}/{stock}/')
 
         summary_result = pd.read_html(summary, flavor='bs4')
         market_capital = summary_result[-1].iat[0, 1]
         pe_ratio = summary_result[-1].iat[2, 1]
         forward_dividend_yield = summary_result[-1].iat[5, 1]
 
-        scrapped = bs(r.text, "html.parser")
+        scrapped = BeautifulSoup(r.text, "html.parser")
         raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
         price = float(raw_data.find('span').text)
 
@@ -68,14 +69,12 @@ def analyzer(stock):
         analysis_next_year = analysis_result[-1].iat[3, 1]
         analysis_next_5_years = analysis_result[-1].iat[4, 1]
         analysis_past_5_years = analysis_result[-1].iat[5, 1]
-        result = market_capital, pe_ratio, forward_dividend_yield, price, high, low, profit_margin, \
-                 price_book_ratio, return_on_equity, analysis_next_year, analysis_next_5_years, \
-                 analysis_past_5_years
+        result = market_capital, pe_ratio, forward_dividend_yield, price, high, low, profit_margin, price_book_ratio, \
+            return_on_equity, analysis_next_year, analysis_next_5_years, analysis_past_5_years
         stock_map.update({stock: result})
     except (ValueError, IndexError):
         np += 1
         logger.info(f'Unable to analyze {stock}')
-        pass
     except HTTPError:
         retries += 1
         wait = retries * 30
@@ -96,17 +95,17 @@ def reprocess_threads():
     tnp = 0
     for pending in tqdm(stuck_thread, total=st_stocks, desc='Retrying Analysis', unit='stock', leave=True):
         try:
-            summary = f'https://finance.yahoo.com/quote/{pending}/'
-            stats = f'https://finance.yahoo.com/quote/{pending}/key-statistics/'
-            analysis = f'https://finance.yahoo.com/quote/{pending}/analysis/'
-            r = requests.get(f'https://finance.yahoo.com/quote/{pending}/')
+            summary = f'{BASE_URL}/{pending}/'
+            stats = f'{BASE_URL}/{pending}/key-statistics/'
+            analysis = f'{BASE_URL}/{pending}/analysis/'
+            r = requests.get(f'{BASE_URL}/{pending}/')
 
             summary_result = pd.read_html(summary, flavor='bs4')
             market_capital = summary_result[-1].iat[0, 1]
             pe_ratio = summary_result[-1].iat[2, 1]
             forward_dividend_yield = summary_result[-1].iat[5, 1]
 
-            scrapped = bs(r.text, "html.parser")
+            scrapped = BeautifulSoup(r.text, "html.parser")
             raw_data = scrapped.find_all('div', {'class': 'My(6px) Pos(r) smartphone_Mt(6px)'})[0]
             price = float(raw_data.find('span').text)
 
@@ -122,8 +121,8 @@ def reprocess_threads():
             analysis_next_5_years = analysis_result[-1].iat[4, 1]
             analysis_past_5_years = analysis_result[-1].iat[5, 1]
             result = market_capital, pe_ratio, forward_dividend_yield, price, high, low, profit_margin, \
-                     price_book_ratio, return_on_equity, analysis_next_year, analysis_next_5_years, \
-                     analysis_past_5_years
+                price_book_ratio, return_on_equity, analysis_next_year, analysis_next_5_years, \
+                analysis_past_5_years
             stock_map.update({pending: result})
         except (ValueError, IndexError, HTTPError):
             tnp += 1
@@ -167,8 +166,9 @@ def time_converter(seconds):
 
 
 if __name__ == '__main__':
+    BASE_URL = 'https://finance.yahoo.com/quote'
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')
-    workbook = wb(filename)
+    workbook = Workbook(filename)
     worksheet = workbook.add_worksheet('Results')
     current_year = int(datetime.today().year)
     worksheet_initializer()
