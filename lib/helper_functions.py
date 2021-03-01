@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 log_filename = datetime.now().strftime('logs/stock_logs_%H:%M_%d-%m-%Y.log')
 logging.basicConfig(filename=log_filename, level=logging.INFO,
                     format='%(asctime)s %(message)s')
-logger = logging.getLogger('thor.py')
+logger = logging.getLogger('thor_api.py')
 
 
 def nasdaq():
