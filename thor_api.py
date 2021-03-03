@@ -2,6 +2,7 @@ import os
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from urllib.error import HTTPError
 
 from numerize import numerize
 from tqdm import tqdm
@@ -45,11 +46,30 @@ def make_float(val):
 
 def analyzer(stock):
     """Gathers all the necessary details."""
+    global count_404, printed
     try:
         info = Ticker(stock).info
-    except (ValueError, KeyError):
+    except (ValueError, KeyError, IndexError):
         info = None
         logger.info(f'Unable to analyze {stock}')
+    except HTTPError as err:
+        info = None
+        # A 503 response or 50% 404 response with only 20% processed requests indicates an IP range denial
+        if err.code == 503 or (count_404 > 50 * overall / 100 and len(stock_map) < 20 * overall / 100):
+            print(f'\nNoticing repeated 404s, which indicates an IP range denial by {"/".join(err.url.split("/")[:3])}'
+                  '\nPlease wait for a while before re-running this code. '
+                  'Also, reduce number of max_workers in concurrency and consider switching to a new Network ID.') if \
+                not printed else None
+            printed = True  # makes sure the print statement happens only once
+            ThreadPoolExecutor().shutdown()  # stop future threads to avoid progress bar on screen post print
+            raise ConnectionRefusedError  # handle exception so that spreadsheet is created with existing stock_map dict
+        elif err.code == 404:
+            count_404 += 1  # increases count_404 for future handling
+            logger.info(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
+                        f'Reason: {err.reason}.')
+        else:
+            logger.info(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
+                        f'Reason: {err.reason}.')
     if info:
         stock_name = info['shortName'] if 'shortName' in info.keys() and info['shortName'] else None
         capital = numerize.numerize(info['marketCap']) if 'marketCap' in info.keys() and info['marketCap'] else None
@@ -72,26 +92,26 @@ def analyzer(stock):
         stock_map.update({stock: result})
 
 
-def writer():
+def writer(mapping_dict):
     """Writes the global variable value ({stock_map}) to an excel sheet."""
     n = 0
-    for ticker in stock_map:
+    for ticker in mapping_dict:
         n = n + 1
         worksheet.write(n, 0, f'{ticker}')
-        worksheet.write(n, 1, f'{stock_map[ticker][0]}')
-        worksheet.write(n, 2, f'{stock_map[ticker][1]}')
-        worksheet.write(n, 3, f'{stock_map[ticker][2]}')
-        worksheet.write(n, 4, f'{stock_map[ticker][3]}')
-        worksheet.write(n, 5, f'{stock_map[ticker][4]}')
-        worksheet.write(n, 6, f'{stock_map[ticker][5]}')
-        worksheet.write(n, 7, f'{stock_map[ticker][6]}')
-        worksheet.write(n, 8, f'{stock_map[ticker][7]}')
-        worksheet.write(n, 9, f'{stock_map[ticker][8]}')
-        worksheet.write(n, 10, f'{stock_map[ticker][9]}')
-        worksheet.write(n, 11, f'{stock_map[ticker][10]}')
-        worksheet.write(n, 12, f'{stock_map[ticker][11]}')
+        worksheet.write(n, 1, f'{mapping_dict[ticker][0]}')
+        worksheet.write(n, 2, f'{mapping_dict[ticker][1]}')
+        worksheet.write(n, 3, f'{mapping_dict[ticker][2]}')
+        worksheet.write(n, 4, f'{mapping_dict[ticker][3]}')
+        worksheet.write(n, 5, f'{mapping_dict[ticker][4]}')
+        worksheet.write(n, 6, f'{mapping_dict[ticker][5]}')
+        worksheet.write(n, 7, f'{mapping_dict[ticker][6]}')
+        worksheet.write(n, 8, f'{mapping_dict[ticker][7]}')
+        worksheet.write(n, 9, f'{mapping_dict[ticker][8]}')
+        worksheet.write(n, 10, f'{mapping_dict[ticker][9]}')
+        worksheet.write(n, 11, f'{mapping_dict[ticker][10]}')
+        worksheet.write(n, 12, f'{mapping_dict[ticker][11]}')
     workbook.close()
-    return len(stock_map)
+    return len(mapping_dict)
 
 
 def time_converter(seconds):
@@ -110,7 +130,7 @@ def time_converter(seconds):
 
 
 if __name__ == '__main__':
-    from lib.helper_functions import nasdaq, logger
+    from lib.helper_functions import nasdaq, logger  # import in _main_ so that data and logs dir are created in advance
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')  # creates filename with date and time
     workbook = Workbook(filename, {'strings_to_numbers': True})  # allows possible strings as numbers
     worksheet = workbook.add_worksheet('Results')  # sheet name in the workbook
@@ -118,12 +138,17 @@ if __name__ == '__main__':
     stocks = nasdaq()  # gets all the NASDAQ stock ticket values starting A to Z
     overall = len(stocks)
     stock_map = {}  # initiates stock_map as an empty dict
+    count_404 = 0
+    printed = False
     logger.info('Threading initialized to analyze all NASDAQ stocks')
     print('Threading initialized to analyze all NASDAQ stocks')
-    with ThreadPoolExecutor(max_workers=10) as executor:  # multi threaded to 10 workers for throttled processing
-        output = list(
-            tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
-    analyzed = writer()  # gets the number of stocks analyzed as return value after writing to workbook
+    try:
+        with ThreadPoolExecutor(max_workers=10) as executor:  # multi threaded to 10 workers for throttled processing
+            output = list(
+                tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
+    except ConnectionRefusedError:
+        pass
+    analyzed = writer(mapping_dict=stock_map)  # gets the number of stocks analyzed after writing to workbook
 
     # logs and prints some closure information
     logger.info(f'Total Stocks looked up: {overall}')
@@ -138,3 +163,4 @@ if __name__ == '__main__':
     print(f'Total execution time: {time_taken}')
     logger.info(f'Spreadsheet stored as {filename}')
     print(f'Spreadsheet stored as {filename}')
+    os.system(f'open {filename}')  # opens spreadsheet post execution

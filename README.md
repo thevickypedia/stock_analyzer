@@ -1,14 +1,13 @@
 # Stock Analyzer
-Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using Pandas
+Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using [YFinance](https://pypi.org/project/yfinance/)
 
 ### Libraries Used:
 - ThreadPoolExecutor - Uses a pool of threads to execute calls asynchronously
-- Pandas - Retrieve tables from web page
+- YFinance - Yahoo API to request stock information for each ticker value - [thor_api](thor_api.py)
+- Pandas - Retrieve tables while using web calls - [thor](thor.py)
 - BeautifulSoup - Retrieves information in non-tables
 - tqdm - Progress bar
 - xlsxwriter - Writes data into a spreadsheet
-
-##### Note: With current state of the application, no data will be stored if there is a manual interruption.
 
 ## License & copyright
 
