@@ -178,7 +178,7 @@ if __name__ == '__main__':
     overall = len(stocks)
     logger.info('Threading initialized to analyze all NASDAQ stocks')
     print('Threading initialized to analyze all NASDAQ stocks')
-    with ThreadPoolExecutor(max_workers=45) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         output = list(
             tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
 

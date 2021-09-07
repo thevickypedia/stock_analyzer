@@ -1,23 +1,23 @@
-import os
-import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
+from os import path, mkdir, system
+from time import perf_counter
 from urllib.error import HTTPError
 
-from numerize import numerize
+from numerize.numerize import numerize
 from tqdm import tqdm
 from xlsxwriter import Workbook
 from yfinance import Ticker
 
-log_dir = os.path.isdir('logs')
-data_dir = os.path.isdir('data')
+log_dir = path.isdir('logs')
+data_dir = path.isdir('data')
 if not log_dir:
-    os.mkdir('logs')
+    mkdir('logs')
 if not data_dir:
-    os.mkdir('data')
+    mkdir('data')
 
 
-def worksheet_initializer():
+def worksheet_initializer() -> None:
     """Creates header in each column."""
     worksheet.write(0, 0, "Stock Ticker")
     worksheet.write(0, 1, "Stock Name")
@@ -36,22 +36,31 @@ def worksheet_initializer():
     worksheet.write(0, 14, "Employees")
 
 
-def make_float(val):
-    """return float value for each value received."""
-    if val:
-        return round(float(val), 2)
-    else:
-        return None
+def make_float(val: int or float) -> float:
+    """Return float value for each value received.
+
+    Args:
+        val: Takes integer or float as an argument and converts it to a proper decimal valued float number.
+
+    Returns:
+        float:
+        Rounded float value to 2 decimal points.
+    """
+    return round(float(val), 2)
 
 
-def analyzer(stock):
-    """Gathers all the necessary details."""
+def analyzer(stock: str) -> None:
+    """Gathers all the necessary details.
+
+    Args:
+        stock: Takes stock ticker value as argument.
+    """
     global count_404, printed
     try:
         info = Ticker(stock).info
     except (ValueError, KeyError, IndexError):
         info = None
-        logger.info(f'Unable to analyze {stock}')
+        logger.error(f'Unable to analyze {stock}')
     except HTTPError as err:
         info = None
         # A 503 response or 50% 404 response with only 20% processed requests indicates an IP range denial
@@ -65,35 +74,44 @@ def analyzer(stock):
             raise ConnectionRefusedError  # handle exception so that spreadsheet is created with existing stock_map dict
         elif err.code == 404:
             count_404 += 1  # increases count_404 for future handling
-            logger.info(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
-                        f'Reason: {err.reason}.')
+            logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
+                         f'Reason: {err.reason}.')
         else:
-            logger.info(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
-                        f'Reason: {err.reason}.')
+            logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
+                         f'Reason: {err.reason}.')
     if info:
-        stock_name = info['shortName'] if 'shortName' in info.keys() and info['shortName'] else None
-        capital = numerize.numerize(info['marketCap']) if 'marketCap' in info.keys() and info['marketCap'] else None
-        dividend_yield = make_float(info['dividendYield']) if 'dividendYield' in info.keys() else None
-        pe_ratio = make_float(info['forwardPE']) if 'forwardPE' in info.keys() else None
-        pb_ratio = make_float(info['priceToBook']) if 'priceToBook' in info.keys() else None
-        price = make_float(info['ask']) if 'ask' in info.keys() else None
-        today_high = make_float(info['dayHigh']) if 'dayHigh' in info.keys() else None
-        today_low = make_float(info['dayLow']) if 'dayLow' in info.keys() else None
-        high_52_weeks = make_float(info['fiftyTwoWeekHigh']) if 'fiftyTwoWeekHigh' in info.keys() else None
-        low_52_weeks = make_float(info['fiftyTwoWeekLow']) if 'fiftyTwoWeekLow' in info.keys() else None
-        d_yield_5y = make_float(info['fiveYearAvgDividendYield']) if 'fiveYearAvgDividendYield' in info.keys() else None
-        profit_margin = make_float(info['profitMargins']) if 'profitMargins' in info.keys() else None
-        industry = info['industry'] if 'industry' in info.keys() else None
-        employees = numerize.numerize(info['fullTimeEmployees']) if 'fullTimeEmployees' in info.keys() and \
-                                                                    info['fullTimeEmployees'] else None
+        stock_name = info.get('shortName')
+        capital = numerize(info.get('marketCap'))
+        dividend_yield = make_float(info.get('dividendYield'))
+        pe_ratio = make_float(info.get('forwardPE'))
+        pb_ratio = make_float(info.get('priceToBook'))
+        price = make_float(info.get('ask'))
+        today_high = make_float(info.get('dayHigh'))
+        today_low = make_float(info.get('dayLow'))
+        high_52_weeks = make_float(info.get('fiftyTwoWeekHigh'))
+        low_52_weeks = make_float(info.get('fiftyTwoWeekLow'))
+        d_yield_5y = make_float(info.get('fiveYearAvgDividendYield'))
+        profit_margin = make_float(info.get('profitMargins'))
+        industry = info.get('industry')
+        fte = info.get('fullTimeEmployees')
+
+        employees = numerize(fte) if fte else None
 
         result = stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, \
             high_52_weeks, low_52_weeks, d_yield_5y, profit_margin, industry, employees
         stock_map.update({stock: result})
 
 
-def writer(mapping_dict):
-    """Writes the global variable value ({stock_map}) to an excel sheet."""
+def writer(mapping_dict: dict) -> int:
+    """Writes the global variable value ({stock_map}) to an excel sheet.
+
+    Args:
+        mapping_dict: Takes a dictionary as argument.
+
+    Returns:
+        int:
+        Returns the number of elements in the dictionary.
+    """
     n = 0
     for ticker in mapping_dict:
         n = n + 1
@@ -114,8 +132,16 @@ def writer(mapping_dict):
     return len(mapping_dict)
 
 
-def time_converter(seconds):
-    """Converts seconds to appropriate hours/minutes"""
+def time_converter(seconds: int) -> str:
+    """Converts seconds to appropriate hours/minutes.
+
+    Args:
+        seconds: Takes the number of seconds as argument.
+
+    Returns:
+        str:
+        Converted seconds to human readable values.
+    """
     seconds = seconds % (24 * 3600)
     hour = seconds // 3600
     seconds %= 3600
@@ -131,6 +157,7 @@ def time_converter(seconds):
 
 if __name__ == '__main__':
     from lib.helper_functions import nasdaq, logger  # import in _main_ so that data and logs dir are created in advance
+
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')  # creates filename with date and time
     workbook = Workbook(filename, {'strings_to_numbers': True})  # allows possible strings as numbers
     worksheet = workbook.add_worksheet('Results')  # sheet name in the workbook
@@ -158,9 +185,9 @@ if __name__ == '__main__':
     logger.info(f'Total Stocks failed to analyze: {overall - analyzed}')
     print(f'Total Stocks failed to analyze: {overall - analyzed}')
 
-    time_taken = time_converter(round(time.perf_counter()))
+    time_taken = time_converter(round(perf_counter()))
     logger.info(f'Total execution time: {time_taken}')
     print(f'Total execution time: {time_taken}')
     logger.info(f'Spreadsheet stored as {filename}')
     print(f'Spreadsheet stored as {filename}')
-    os.system(f'open {filename}')  # opens spreadsheet post execution
+    system(f'open {filename}')  # opens spreadsheet post execution
