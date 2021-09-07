@@ -1,6 +1,6 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from os import path, mkdir, system
+from os import mkdir, path, system
 from time import perf_counter
 from urllib.error import HTTPError
 
@@ -49,6 +49,62 @@ def make_float(val: int or float) -> float:
     return round(float(val), 2)
 
 
+def extract_data(data: dict) -> tuple:
+    """Extracts the necessary information of each stock from the data received.
+
+    Args:
+        data: Takes the information of each ticker value as an argument.
+
+    Returns:
+        tuple:
+        A tuple of ``Stock Name``, ``Market Capital``, ``Dividend Yield``, ``PE Ratio``, ``PB Ratio``,
+        ``Current Price``, ``Today's High Price``, ``Today's Low Price``, ``52 Week High``, ``52 Week Low``,
+        ``5 Year Dividend Yield``, ``Profit Margin``, ``Industry``, ``Number of Employees``
+    """
+    stock_name = data.get('shortName')
+
+    cap = data.get('marketCap')
+    capital = numerize(cap) if cap else None
+
+    div_yield = data.get('dividendYield')
+    dividend_yield = make_float(div_yield) if div_yield else None
+
+    fw_pe = data.get('forwardPE')
+    pe_ratio = make_float(fw_pe) if fw_pe else None
+
+    p2b = data.get('priceToBook')
+    pb_ratio = make_float(p2b) if p2b else None
+
+    price_ = data.get('ask')
+    price = make_float(price_) if price_ else price_
+
+    high = data.get('dayHigh')
+    today_high = make_float(high) if high else None
+
+    low = data.get('dayLow')
+    today_low = make_float(low) if low else None
+
+    high_52 = data.get('fiftyTwoWeekHigh')
+    high_52_weeks = make_float(high_52) if high_52 else None
+
+    low_52 = data.get('fiftyTwoWeekLow')
+    low_52_weeks = make_float(low_52) if low_52 else None
+
+    yield_5 = data.get('fiveYearAvgDividendYield')
+    d_yield_5y = make_float(yield_5) if yield_5 else None
+
+    pm = data.get('profitMargins')
+    profit_margin = make_float(pm) if pm else None
+
+    industry = data.get('industry')
+
+    fte = data.get('fullTimeEmployees')
+    employees = numerize(fte) if fte else None
+
+    return stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks, \
+        low_52_weeks, d_yield_5y, profit_margin, industry, employees
+
+
 def analyzer(stock: str) -> None:
     """Gathers all the necessary details.
 
@@ -80,49 +136,7 @@ def analyzer(stock: str) -> None:
             logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
                          f'Reason: {err.reason}.')
     if info:
-        stock_name = info.get('shortName')
-
-        cap = info.get('marketCap')
-        capital = numerize(cap) if cap else None
-
-        div_yield = info.get('dividendYield')
-        dividend_yield = make_float(div_yield) if div_yield else None
-
-        fw_pe = info.get('forwardPE')
-        pe_ratio = make_float(fw_pe) if fw_pe else None
-
-        p2b = info.get('priceToBook')
-        pb_ratio = make_float(p2b) if p2b else None
-
-        price_ = info.get('ask')
-        price = make_float(price_) if price_ else price_
-
-        high = info.get('dayHigh')
-        today_high = make_float(high) if high else None
-
-        low = info.get('dayLow')
-        today_low = make_float(low) if low else None
-
-        high_52 = info.get('fiftyTwoWeekHigh')
-        high_52_weeks = make_float(high_52) if high_52 else None
-
-        low_52 = info.get('fiftyTwoWeekLow')
-        low_52_weeks = make_float(low_52) if low_52 else None
-
-        yield_5 = info.get('fiveYearAvgDividendYield')
-        d_yield_5y = make_float(yield_5) if yield_5 else None
-
-        pm = info.get('profitMargins')
-        profit_margin = make_float(pm) if pm else None
-
-        industry = info.get('industry')
-
-        fte = info.get('fullTimeEmployees')
-        employees = numerize(fte) if fte else None
-
-        result = stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, \
-            high_52_weeks, low_52_weeks, d_yield_5y, profit_margin, industry, employees
-        stock_map.update({stock: result})
+        stock_map.update({stock: extract_data(data=info)})
 
 
 def writer(mapping_dict: dict) -> int:
@@ -179,7 +193,8 @@ def time_converter(seconds: int) -> str:
 
 
 if __name__ == '__main__':
-    from lib.helper_functions import nasdaq, logger  # import in _main_ so that data and logs dir are created in advance
+    from lib.helper_functions import (  # import in _main_ so that data and logs dir are created in advance
+        logger, nasdaq)
 
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')  # creates filename with date and time
     workbook = Workbook(filename, {'strings_to_numbers': True})  # allows possible strings as numbers

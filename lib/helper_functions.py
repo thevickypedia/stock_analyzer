@@ -11,7 +11,13 @@ logging.basicConfig(filename=log_filename, level=logging.INFO,
 logger = logging.getLogger('thor_api.py')
 
 
-def nasdaq():
+def nasdaq() -> list:
+    """Gathers all the stock tickers under NASDAQ.
+
+    Returns:
+        list:
+        List of stock tickers.
+    """
     char = string.ascii_uppercase
     stock_list = []
     logger.info('Fetching tickers for all NASDAQ stocks')

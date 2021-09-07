@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from xlsxwriter import Workbook
 
-from lib.helper_functions import nasdaq, logger
+from lib.helper_functions import logger, nasdaq
 
 log_dir = os.path.isdir('logs')
 data_dir = os.path.isdir('data')
@@ -24,6 +24,7 @@ if not data_dir:
 
 
 def worksheet_initializer():
+    """Creates header in each column."""
     worksheet.write(0, 0, "Stock Ticker")
     worksheet.write(0, 1, "Capital")
     worksheet.write(0, 2, "PE Ratio")
@@ -39,7 +40,16 @@ def worksheet_initializer():
     worksheet.write(0, 12, f"{current_year - 5} - {current_year} Analysis")
 
 
-def analyzer(stock):
+def analyzer(stock: str) -> tuple:
+    """Gathers all the necessary details.
+
+    Args:
+        stock: Takes stock ticker value as argument.
+
+    Returns:
+        tuple:
+        A tuple of unprocessed stock tickers and tickers for which a retry was performed.
+    """
     np = 0
     retries = 0
     # noinspection PyBroadException
@@ -83,7 +93,7 @@ def analyzer(stock):
         thread = (''.join([t for t in ct if t.isdigit()]))
         logger.info(f'WARNING: Waiting for {wait} secs for thread: {thread} on {stock}')
         stuck_thread.append(stock)
-    except:
+    except:  # noqa: E722
         print(f'ERROR: Unhandled Exception, Saving spreadsheet. See stacktrace below:\n'
               f'{traceback.print_exc(file=sys.stdout)}')
         writer()
@@ -91,7 +101,13 @@ def analyzer(stock):
     return np, retries
 
 
-def reprocess_threads():
+def reprocess_threads() -> int:
+    """Collects the threads that were failed to process in the initial attempt and reprocesses them.
+
+    Returns:
+        int:
+        Returns the number of tickers that were unprocessed even after a retry.
+    """
     tnp = 0
     for pending in tqdm(stuck_thread, total=st_stocks, desc='Retrying Analysis', unit='stock', leave=True):
         try:
@@ -132,6 +148,7 @@ def reprocess_threads():
 
 
 def writer():
+    """Writes the global variable value ({stock_map}) to an excel sheet."""
     n = 0
     for ticker in stock_map:
         n = n + 1
@@ -151,7 +168,16 @@ def writer():
     workbook.close()
 
 
-def time_converter(seconds):
+def time_converter(seconds: int) -> str:
+    """Converts seconds to appropriate hours/minutes.
+
+    Args:
+        seconds: Takes the number of seconds as argument.
+
+    Returns:
+        str:
+        Converted seconds to human readable values.
+    """
     seconds = seconds % (24 * 3600)
     hour = seconds // 3600
     seconds %= 3600

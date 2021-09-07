@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Welcome to Stock Analyzer’s documentation! &#8212; Stock Analyzer  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stock Analyzer" href="README.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="Stock Analyzer"
+             accesskey="N">next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Stock Analyzer  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to Stock Analyzer’s documentation!</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="welcome-to-stock-analyzer-s-documentation">
+<h1>Welcome to Stock Analyzer’s documentation!<a class="headerlink" href="#welcome-to-stock-analyzer-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Read Me:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="README.html">Stock Analyzer</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="README.html#libraries-used">Libraries Used:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#options">Options:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#instructions">Instructions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#links">Links:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#license-copyright">License &amp; copyright</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-thor_api">
+<span id="thor-api"></span><h1>Thor - API<a class="headerlink" href="#module-thor_api" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.analyzer">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#thor_api.analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers all the necessary details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stock</strong> – Takes stock ticker value as argument.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.extract_data">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">extract_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#thor_api.extract_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts the necessary information of each stock from the data received.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> – Takes the information of each ticker value as an argument.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of <code class="docutils literal notranslate"><span class="pre">Stock</span> <span class="pre">Name</span></code>, <code class="docutils literal notranslate"><span class="pre">Market</span> <span class="pre">Capital</span></code>, <code class="docutils literal notranslate"><span class="pre">Dividend</span> <span class="pre">Yield</span></code>, <code class="docutils literal notranslate"><span class="pre">PE</span> <span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">PB</span> <span class="pre">Ratio</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Current</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">Today's</span> <span class="pre">High</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">Today's</span> <span class="pre">Low</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">52</span> <span class="pre">Week</span> <span class="pre">High</span></code>, <code class="docutils literal notranslate"><span class="pre">52</span> <span class="pre">Week</span> <span class="pre">Low</span></code>,
+<code class="docutils literal notranslate"><span class="pre">5</span> <span class="pre">Year</span> <span class="pre">Dividend</span> <span class="pre">Yield</span></code>, <code class="docutils literal notranslate"><span class="pre">Profit</span> <span class="pre">Margin</span></code>, <code class="docutils literal notranslate"><span class="pre">Industry</span></code>, <code class="docutils literal notranslate"><span class="pre">Number</span> <span class="pre">of</span> <span class="pre">Employees</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.make_float">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">make_float</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#thor_api.make_float" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return float value for each value received.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>val</strong> – Takes integer or float as an argument and converts it to a proper decimal valued float number.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Rounded float value to 2 decimal points.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.time_converter">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">time_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#thor_api.time_converter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts seconds to appropriate hours/minutes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seconds</strong> – Takes the number of seconds as argument.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted seconds to human readable values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.worksheet_initializer">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">worksheet_initializer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#thor_api.worksheet_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates header in each column.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.writer">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#thor_api.writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the global variable value ({stock_map}) to an excel sheet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mapping_dict</strong> – Takes a dictionary as argument.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns the number of elements in the dictionary.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-thor_legacy">
+<span id="thor-legacy"></span><h1>Thor - Legacy<a class="headerlink" href="#module-thor_legacy" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_legacy.analyzer">
+<span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#thor_legacy.analyzer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers all the necessary details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>stock</strong> – Takes stock ticker value as argument.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A tuple of unprocessed stock tickers and tickers for which a retry was performed.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_legacy.reprocess_threads">
+<span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">reprocess_threads</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#thor_legacy.reprocess_threads" title="Permalink to this definition">¶</a></dt>
+<dd><p>Collects the threads that were failed to process in the initial attempt and reprocesses them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns the number of tickers that were unprocessed even after a retry.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_legacy.time_converter">
+<span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">time_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#thor_legacy.time_converter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts seconds to appropriate hours/minutes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>seconds</strong> – Takes the number of seconds as argument.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted seconds to human readable values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_legacy.worksheet_initializer">
+<span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">worksheet_initializer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#thor_legacy.worksheet_initializer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates header in each column.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_legacy.writer">
+<span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">writer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#thor_legacy.writer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes the global variable value ({stock_map}) to an excel sheet.</p>
+</dd></dl>
+
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to Stock Analyzer’s documentation!</a></li>
+<li><a class="reference internal" href="#module-thor_api">Thor - API</a></li>
+<li><a class="reference internal" href="#module-thor_legacy">Thor - Legacy</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h4>Next topic</h4>
+  <p class="topless"><a href="README.html"
+                        title="next chapter">Stock Analyzer</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/index.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="README.html" title="Stock Analyzer"
+             >next</a> |</li>
+        <li class="nav-item nav-item-0"><a href="#">Stock Analyzer  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Welcome to Stock Analyzer’s documentation!</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Vignesh Sivanandha Rao.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.2.
+    </div>
+  </body>
+</html>
