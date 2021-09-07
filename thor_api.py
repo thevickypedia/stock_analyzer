@@ -81,20 +81,43 @@ def analyzer(stock: str) -> None:
                          f'Reason: {err.reason}.')
     if info:
         stock_name = info.get('shortName')
-        capital = numerize(info.get('marketCap'))
-        dividend_yield = make_float(info.get('dividendYield'))
-        pe_ratio = make_float(info.get('forwardPE'))
-        pb_ratio = make_float(info.get('priceToBook'))
-        price = make_float(info.get('ask'))
-        today_high = make_float(info.get('dayHigh'))
-        today_low = make_float(info.get('dayLow'))
-        high_52_weeks = make_float(info.get('fiftyTwoWeekHigh'))
-        low_52_weeks = make_float(info.get('fiftyTwoWeekLow'))
-        d_yield_5y = make_float(info.get('fiveYearAvgDividendYield'))
-        profit_margin = make_float(info.get('profitMargins'))
-        industry = info.get('industry')
-        fte = info.get('fullTimeEmployees')
 
+        cap = info.get('marketCap')
+        capital = numerize(cap) if cap else None
+
+        div_yield = info.get('dividendYield')
+        dividend_yield = make_float(div_yield) if div_yield else None
+
+        fw_pe = info.get('forwardPE')
+        pe_ratio = make_float(fw_pe) if fw_pe else None
+
+        p2b = info.get('priceToBook')
+        pb_ratio = make_float(p2b) if p2b else None
+
+        price_ = info.get('ask')
+        price = make_float(price_) if price_ else price_
+
+        high = info.get('dayHigh')
+        today_high = make_float(high) if high else None
+
+        low = info.get('dayLow')
+        today_low = make_float(low) if low else None
+
+        high_52 = info.get('fiftyTwoWeekHigh')
+        high_52_weeks = make_float(high_52) if high_52 else None
+
+        low_52 = info.get('fiftyTwoWeekLow')
+        low_52_weeks = make_float(low_52) if low_52 else None
+
+        yield_5 = info.get('fiveYearAvgDividendYield')
+        d_yield_5y = make_float(yield_5) if yield_5 else None
+
+        pm = info.get('profitMargins')
+        profit_margin = make_float(pm) if pm else None
+
+        industry = info.get('industry')
+
+        fte = info.get('fullTimeEmployees')
         employees = numerize(fte) if fte else None
 
         result = stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, \
