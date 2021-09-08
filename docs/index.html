@@ -47,11 +47,11 @@
 <p class="caption" role="heading"><span class="caption-text">Read Me:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="README.html">Stock Analyzer</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="README.html#libraries-used">Libraries Used:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#options">Options:</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#instructions">Instructions:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#libraries-used">Libraries Used</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#options">Options</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#instructions">Instructions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#linting">Linting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="README.html#links">Links:</a></li>
+<li class="toctree-l2"><a class="reference internal" href="README.html#links">Links</a></li>
 <li class="toctree-l2"><a class="reference internal" href="README.html#license-copyright">License &amp; copyright</a></li>
 </ul>
 </li>
@@ -63,7 +63,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="thor_api.analyzer">
 <span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#thor_api.analyzer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Gathers all the necessary details.</p>
+<dd><p>Gathers all the necessary details from each stock ticker. Calls <code class="docutils literal notranslate"><span class="pre">extract_data()</span></code> to get specifics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>stock</strong> – Takes stock ticker value as argument.</p>
@@ -72,20 +72,48 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="thor_api.columns">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">columns</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#thor_api.columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Names of the columns that needs to be on the header in the spreadsheet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of headers for the spreadsheet.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="thor_api.extract_data">
-<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">extract_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#thor_api.extract_data" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">extract_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#thor_api.extract_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Extracts the necessary information of each stock from the data received.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>data</strong> – Takes the information of each ticker value as an argument.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>A tuple of <code class="docutils literal notranslate"><span class="pre">Stock</span> <span class="pre">Name</span></code>, <code class="docutils literal notranslate"><span class="pre">Market</span> <span class="pre">Capital</span></code>, <code class="docutils literal notranslate"><span class="pre">Dividend</span> <span class="pre">Yield</span></code>, <code class="docutils literal notranslate"><span class="pre">PE</span> <span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">PB</span> <span class="pre">Ratio</span></code>,
+<dd class="field-even"><p>A list of <code class="docutils literal notranslate"><span class="pre">Stock</span> <span class="pre">Name</span></code>, <code class="docutils literal notranslate"><span class="pre">Market</span> <span class="pre">Capital</span></code>, <code class="docutils literal notranslate"><span class="pre">Dividend</span> <span class="pre">Yield</span></code>, <code class="docutils literal notranslate"><span class="pre">PE</span> <span class="pre">Ratio</span></code>, <code class="docutils literal notranslate"><span class="pre">PB</span> <span class="pre">Ratio</span></code>,
 <code class="docutils literal notranslate"><span class="pre">Current</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">Today's</span> <span class="pre">High</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">Today's</span> <span class="pre">Low</span> <span class="pre">Price</span></code>, <code class="docutils literal notranslate"><span class="pre">52</span> <span class="pre">Week</span> <span class="pre">High</span></code>, <code class="docutils literal notranslate"><span class="pre">52</span> <span class="pre">Week</span> <span class="pre">Low</span></code>,
 <code class="docutils literal notranslate"><span class="pre">5</span> <span class="pre">Year</span> <span class="pre">Dividend</span> <span class="pre">Yield</span></code>, <code class="docutils literal notranslate"><span class="pre">Profit</span> <span class="pre">Margin</span></code>, <code class="docutils literal notranslate"><span class="pre">Industry</span></code>, <code class="docutils literal notranslate"><span class="pre">Number</span> <span class="pre">of</span> <span class="pre">Employees</span></code></p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>tuple</p>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.get_sort_key">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">get_sort_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#thor_api.get_sort_key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays a menu to the user, and prompts to choose how the user likes to sort the spreadsheet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Returns the index value using which the sorting has to be done.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
@@ -103,6 +131,26 @@
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="thor_api.sort_by_value">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">sort_by_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#thor_api.sort_by_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sorts the dictionary.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Dictionary which has to be sorted.</p></li>
+<li><p><strong>sort</strong> – Index value of the list in the <code class="docutils literal notranslate"><span class="pre">value</span></code> of the dictionary.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Returns the dictionary which is sorted by a particular element in the list of values.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
@@ -133,7 +181,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="thor_api.writer">
 <span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">writer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#thor_api.writer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Writes the global variable value ({stock_map}) to an excel sheet.</p>
+<dd><p>Writes the global variable value <code class="docutils literal notranslate"><span class="pre">{stock_map}</span></code> to a spreadsheet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>mapping_dict</strong> – Takes a dictionary as argument.</p>

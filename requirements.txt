@@ -7,3 +7,5 @@ yfinance
 bs4
 beautifulsoup4
 html5lib
+pick
+psutil

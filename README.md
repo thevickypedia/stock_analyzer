@@ -1,19 +1,19 @@
 # Stock Analyzer
-Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using [YFinance](https://pypi.org/project/yfinance/)
+Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using [YFinance](https://pypi.org/project/yfinance/) API
 
-### Libraries Used:
+### Libraries Used
 - `ThreadPoolExecutor` - Uses a pool of threads to execute calls asynchronously
-- `YFinance` - Yahoo API to request stock information for each ticker value - [thor_api](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py)
-- `Pandas` - Retrieve tables while using web calls - [thor](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py)
+- `YFinance` - Yahoo API to request stock information for each ticker value - [Thor API](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py)
+- `Pandas` - Retrieve tables while using web calls - [Thor Legacy](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py)
 - `BeautifulSoup` - Retrieves information in non-tables
 - `Tqdm` - Progress bar
 - `Xlsxwriter` - Writes data into a spreadsheet
 
-### Options:
+### Options
 - [Web calls - legacy](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py) - Uses web calls to https://finance.yahoo.com
 - [API](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py) - Uses Yahoo Finance API
 
-### Instructions:
+### Instructions
 1. `git clone https://github.com/thevickypedia/stock_analyzer.git`
 2. `python3 -m venv venv`
 3. `source venv/bin/activate`
@@ -23,13 +23,15 @@ Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using [Y
 ### Linting
 `PreCommit` will ensure linting, and the doc creation are run on every commit.
 
-###### Requirement:
+Requirement:
+<br>
 `pip install --no-cache --upgrade sphinx pre-commit recommonmark`
 
-###### Usage:
+Usage:
+<br>
 `pre-commit run --all-files`
 
-### Links:
+### Links
 [Repository](https://github.com/thevickypedia/stock_analyzer)
 
 [Runbook](https://thevickypedia.github.io/stock_analyzer/)

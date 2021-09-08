@@ -1,10 +1,13 @@
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
-from os import mkdir, path, system
+from os import getpid, mkdir, path, system
 from time import perf_counter
 from urllib.error import HTTPError
 
+from _curses import error
 from numerize.numerize import numerize
+from pick import pick
+from psutil import Process
 from tqdm import tqdm
 from xlsxwriter import Workbook
 from yfinance import Ticker
@@ -17,23 +20,68 @@ if not data_dir:
     mkdir('data')
 
 
+def sort_by_value(data: dict, sort: int) -> dict:
+    """Sorts the dictionary.
+
+    Args:
+        data: Dictionary which has to be sorted.
+        sort: Index value of the list in the ``value`` of the dictionary.
+
+    Returns:
+        dict:
+        Returns the dictionary which is sorted by a particular element in the list of values.
+    """
+    for key, value in data.items():
+        if not value[sort]:
+            value[sort] = 0
+            data[key] = value
+    return dict(sorted(data.items(), key=lambda e: e[1][sort], reverse=True))
+
+
+def columns() -> list:
+    """Names of the columns that needs to be on the header in the spreadsheet.
+
+    Returns:
+        list:
+        List of headers for the spreadsheet.
+    """
+    return [
+        "Stock Ticker",
+        "Stock Name",
+        "Market Capital",
+        "Dividend Yield",
+        "PE Ratio",
+        "PB Ratio",
+        "Current Price",
+        "Today's High",
+        "Today's Low",
+        "52W High",
+        "52W Low",
+        "5Y Dividend Yield",
+        "Profit Margin",
+        "Industry",
+        "Employees"
+    ]
+
+
 def worksheet_initializer() -> None:
     """Creates header in each column."""
-    worksheet.write(0, 0, "Stock Ticker")
-    worksheet.write(0, 1, "Stock Name")
-    worksheet.write(0, 2, "Market Capital")
-    worksheet.write(0, 3, "Dividend Yield")
-    worksheet.write(0, 4, "PE Ratio")
-    worksheet.write(0, 5, "PB Ratio")
-    worksheet.write(0, 6, "Current Price")
-    worksheet.write(0, 7, "Today's High")
-    worksheet.write(0, 8, "Today's Low")
-    worksheet.write(0, 9, "52W High")
-    worksheet.write(0, 10, "52W Low")
-    worksheet.write(0, 11, "5Y Dividend Yield")
-    worksheet.write(0, 12, "Profit Margin")
-    worksheet.write(0, 13, "Industry")
-    worksheet.write(0, 14, "Employees")
+    titles = columns()
+    worksheet.write(0, 0, titles[0])
+    worksheet.write(0, 1, titles[1])
+    worksheet.write(0, 2, titles[2])
+    worksheet.write(0, 3, titles[3])
+    worksheet.write(0, 4, titles[4])
+    worksheet.write(0, 5, titles[5])
+    worksheet.write(0, 6, titles[6])
+    worksheet.write(0, 7, titles[7])
+    worksheet.write(0, 8, titles[8])
+    worksheet.write(0, 9, titles[9])
+    worksheet.write(0, 10, titles[10])
+    worksheet.write(0, 11, titles[11])
+    worksheet.write(0, 12, titles[12])
+    worksheet.write(0, 13, titles[13])
+    worksheet.write(0, 14, titles[14])
 
 
 def make_float(val: int or float) -> float:
@@ -49,15 +97,15 @@ def make_float(val: int or float) -> float:
     return round(float(val), 2)
 
 
-def extract_data(data: dict) -> tuple:
+def extract_data(data: dict) -> list:
     """Extracts the necessary information of each stock from the data received.
 
     Args:
         data: Takes the information of each ticker value as an argument.
 
     Returns:
-        tuple:
-        A tuple of ``Stock Name``, ``Market Capital``, ``Dividend Yield``, ``PE Ratio``, ``PB Ratio``,
+        list:
+        A list of ``Stock Name``, ``Market Capital``, ``Dividend Yield``, ``PE Ratio``, ``PB Ratio``,
         ``Current Price``, ``Today's High Price``, ``Today's Low Price``, ``52 Week High``, ``52 Week Low``,
         ``5 Year Dividend Yield``, ``Profit Margin``, ``Industry``, ``Number of Employees``
     """
@@ -101,12 +149,12 @@ def extract_data(data: dict) -> tuple:
     fte = data.get('fullTimeEmployees')
     employees = numerize(fte) if fte else None
 
-    return stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks, \
-        low_52_weeks, d_yield_5y, profit_margin, industry, employees
+    return [stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks,
+            low_52_weeks, d_yield_5y, profit_margin, industry, employees]
 
 
 def analyzer(stock: str) -> None:
-    """Gathers all the necessary details.
+    """Gathers all the necessary details from each stock ticker. Calls ``extract_data()`` to get specifics.
 
     Args:
         stock: Takes stock ticker value as argument.
@@ -140,7 +188,7 @@ def analyzer(stock: str) -> None:
 
 
 def writer(mapping_dict: dict) -> int:
-    """Writes the global variable value ({stock_map}) to an excel sheet.
+    """Writes the global variable value ``{stock_map}`` to a spreadsheet.
 
     Args:
         mapping_dict: Takes a dictionary as argument.
@@ -192,9 +240,29 @@ def time_converter(seconds: int) -> str:
         return f'{seconds} seconds'
 
 
+def get_sort_key() -> int:
+    """Displays a menu to the user, and prompts to choose how the user likes to sort the spreadsheet.
+
+    Returns:
+        int:
+        Returns the index value using which the sorting has to be done.
+    """
+    title = "Please pick a value using which you'd like to sort the spreadsheet (Hit Ctrl+C to sort by stock ticker): "
+    try:
+        option, index = pick(columns()[1:], title, indicator='=>', default_index=0)
+        return index
+    except (error, KeyboardInterrupt):
+        if not (run_env := Process(getpid()).parent().name()).endswith('sh'):
+            logger.error(f"You're using {run_env} to run the script. "
+                         f"Either use a terminal or enable 'Emulate terminal in output console' under\n"
+                         f"Edit Configurations.. -> Execution in your {run_env}.")
+        else:
+            logger.error(error)
+
+
 if __name__ == '__main__':
-    from lib.helper_functions import (  # import in _main_ so that data and logs dir are created in advance
-        logger, nasdaq)
+    # import in _main_ so that data and logs dir are created in advance
+    from lib.helper_functions import logger, nasdaq
 
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')  # creates filename with date and time
     workbook = Workbook(filename, {'strings_to_numbers': True})  # allows possible strings as numbers
@@ -213,6 +281,9 @@ if __name__ == '__main__':
                 tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
     except ConnectionRefusedError:
         pass
+    sort_val = get_sort_key()
+    if sort_val:
+        stock_map = sort_by_value(data=stock_map, sort=sort_val)
     analyzed = writer(mapping_dict=stock_map)  # gets the number of stocks analyzed after writing to workbook
 
     # logs and prints some closure information

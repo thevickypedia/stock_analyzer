@@ -43,27 +43,27 @@
             
   <section id="stock-analyzer">
 <h1>Stock Analyzer<a class="headerlink" href="#stock-analyzer" title="Permalink to this headline">¶</a></h1>
-<p>Analyze all NASDAQ stocks on <a class="reference external" href="https://finance.yahoo.com">Yahoo Finance</a> using <a class="reference external" href="https://pypi.org/project/yfinance/">YFinance</a></p>
+<p>Analyze all NASDAQ stocks on <a class="reference external" href="https://finance.yahoo.com">Yahoo Finance</a> using <a class="reference external" href="https://pypi.org/project/yfinance/">YFinance</a> API</p>
 <section id="libraries-used">
-<h2>Libraries Used:<a class="headerlink" href="#libraries-used" title="Permalink to this headline">¶</a></h2>
+<h2>Libraries Used<a class="headerlink" href="#libraries-used" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> - Uses a pool of threads to execute calls asynchronously</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">YFinance</span></code> - Yahoo API to request stock information for each ticker value - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py">thor_api</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Pandas</span></code> - Retrieve tables while using web calls - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py">thor</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">YFinance</span></code> - Yahoo API to request stock information for each ticker value - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py">Thor API</a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Pandas</span></code> - Retrieve tables while using web calls - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py">Thor Legacy</a></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">BeautifulSoup</span></code> - Retrieves information in non-tables</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Tqdm</span></code> - Progress bar</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Xlsxwriter</span></code> - Writes data into a spreadsheet</p></li>
 </ul>
 </section>
 <section id="options">
-<h2>Options:<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
+<h2>Options<a class="headerlink" href="#options" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py">Web calls - legacy</a> - Uses web calls to https://finance.yahoo.com</p></li>
 <li><p><a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py">API</a> - Uses Yahoo Finance API</p></li>
 </ul>
 </section>
 <section id="instructions">
-<h2>Instructions:<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
+<h2>Instructions<a class="headerlink" href="#instructions" title="Permalink to this headline">¶</a></h2>
 <ol class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/thevickypedia/stock_analyzer.git</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">python3</span> <span class="pre">-m</span> <span class="pre">venv</span> <span class="pre">venv</span></code></p></li>
@@ -75,17 +75,15 @@
 <section id="linting">
 <h2>Linting<a class="headerlink" href="#linting" title="Permalink to this headline">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">PreCommit</span></code> will ensure linting, and the doc creation are run on every commit.</p>
-<section id="requirement">
-<h3>Requirement:<a class="headerlink" href="#requirement" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-cache</span> <span class="pre">--upgrade</span> <span class="pre">sphinx</span> <span class="pre">pre-commit</span> <span class="pre">recommonmark</span></code></p>
-</section>
-<section id="usage">
-<h3>Usage:<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
-<p><code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code></p>
-</section>
+<p>Requirement:
+<br>
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">--no-cache</span> <span class="pre">--upgrade</span> <span class="pre">sphinx</span> <span class="pre">pre-commit</span> <span class="pre">recommonmark</span></code></p>
+<p>Usage:
+<br>
+<code class="docutils literal notranslate"><span class="pre">pre-commit</span> <span class="pre">run</span> <span class="pre">--all-files</span></code></p>
 </section>
 <section id="links">
-<h2>Links:<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
+<h2>Links<a class="headerlink" href="#links" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference external" href="https://github.com/thevickypedia/stock_analyzer">Repository</a></p>
 <p><a class="reference external" href="https://thevickypedia.github.io/stock_analyzer/">Runbook</a></p>
 </section>
@@ -106,15 +104,11 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Stock Analyzer</a><ul>
-<li><a class="reference internal" href="#libraries-used">Libraries Used:</a></li>
-<li><a class="reference internal" href="#options">Options:</a></li>
-<li><a class="reference internal" href="#instructions">Instructions:</a></li>
-<li><a class="reference internal" href="#linting">Linting</a><ul>
-<li><a class="reference internal" href="#requirement">Requirement:</a></li>
-<li><a class="reference internal" href="#usage">Usage:</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#links">Links:</a></li>
+<li><a class="reference internal" href="#libraries-used">Libraries Used</a></li>
+<li><a class="reference internal" href="#options">Options</a></li>
+<li><a class="reference internal" href="#instructions">Instructions</a></li>
+<li><a class="reference internal" href="#linting">Linting</a></li>
+<li><a class="reference internal" href="#links">Links</a></li>
 <li><a class="reference internal" href="#license-copyright">License &amp; copyright</a></li>
 </ul>
 </li>
