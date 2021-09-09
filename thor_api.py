@@ -12,11 +12,9 @@ from tqdm import tqdm
 from xlsxwriter import Workbook
 from yfinance import Ticker
 
-log_dir = path.isdir('logs')
-data_dir = path.isdir('data')
-if not log_dir:
+if not path.isdir('logs'):
     mkdir('logs')
-if not data_dir:
+if not path.isdir('data'):
     mkdir('data')
 
 
@@ -31,6 +29,7 @@ def sort_by_value(data: dict, sort: int) -> dict:
         dict:
         Returns the dictionary which is sorted by a particular element in the list of values.
     """
+    console_logger.info(f'Spreadsheet will be sorted by {headers[1:][sort]}')
     for key, value in data.items():
         if not value[sort]:
             value[sort] = 0
@@ -66,22 +65,21 @@ def columns() -> list:
 
 def worksheet_initializer() -> None:
     """Creates header in each column."""
-    titles = columns()
-    worksheet.write(0, 0, titles[0])
-    worksheet.write(0, 1, titles[1])
-    worksheet.write(0, 2, titles[2])
-    worksheet.write(0, 3, titles[3])
-    worksheet.write(0, 4, titles[4])
-    worksheet.write(0, 5, titles[5])
-    worksheet.write(0, 6, titles[6])
-    worksheet.write(0, 7, titles[7])
-    worksheet.write(0, 8, titles[8])
-    worksheet.write(0, 9, titles[9])
-    worksheet.write(0, 10, titles[10])
-    worksheet.write(0, 11, titles[11])
-    worksheet.write(0, 12, titles[12])
-    worksheet.write(0, 13, titles[13])
-    worksheet.write(0, 14, titles[14])
+    worksheet.write(0, 0, headers[0])
+    worksheet.write(0, 1, headers[1])
+    worksheet.write(0, 2, headers[2])
+    worksheet.write(0, 3, headers[3])
+    worksheet.write(0, 4, headers[4])
+    worksheet.write(0, 5, headers[5])
+    worksheet.write(0, 6, headers[6])
+    worksheet.write(0, 7, headers[7])
+    worksheet.write(0, 8, headers[8])
+    worksheet.write(0, 9, headers[9])
+    worksheet.write(0, 10, headers[10])
+    worksheet.write(0, 11, headers[11])
+    worksheet.write(0, 12, headers[12])
+    worksheet.write(0, 13, headers[13])
+    worksheet.write(0, 14, headers[14])
 
 
 def make_float(val: int or float) -> float:
@@ -161,30 +159,22 @@ def analyzer(stock: str) -> None:
     """
     global count_404, printed
     try:
-        info = Ticker(stock).info
-    except (ValueError, KeyError, IndexError):
-        info = None
-        logger.error(f'Unable to analyze {stock}')
+        stock_map.update({stock: extract_data(data=Ticker(stock).info)})
     except HTTPError as err:
-        info = None
         # A 503 response or 50% 404 response with only 20% processed requests indicates an IP range denial
         if err.code == 503 or (count_404 > 50 * overall / 100 and len(stock_map) < 20 * overall / 100):
-            print(f'\nNoticing repeated 404s, which indicates an IP range denial by {"/".join(err.url.split("/")[:3])}'
-                  '\nPlease wait for a while before re-running this code. '
-                  'Also, reduce number of max_workers in concurrency and consider switching to a new Network ID.') if \
-                not printed else None
+            root_logger.error(f'\nNoticing repeated 404s, which indicates an IP range denial by '
+                              f'{"/".join(err.url.split("/")[:3])}\nPlease wait for a while before re-running this '
+                              'code. Also, reduce number of max_workers in concurrency and consider switching to a '
+                              'new Network ID.') if not printed else None
             printed = True  # makes sure the print statement happens only once
-            ThreadPoolExecutor().shutdown()  # stop future threads to avoid progress bar on screen post print
+            # stop future threads to avoid progress bar on screen post print
             raise ConnectionRefusedError  # handle exception so that spreadsheet is created with existing stock_map dict
-        elif err.code == 404:
-            count_404 += 1  # increases count_404 for future handling
-            logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
-                         f'Reason: {err.reason}.')
         else:
-            logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
-                         f'Reason: {err.reason}.')
-    if info:
-        stock_map.update({stock: extract_data(data=info)})
+            if err.code == 404:
+                count_404 += 1  # increases count_404 for future handling
+            file_logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
+                              f'Reason: {err.reason}.')
 
 
 def writer(mapping_dict: dict) -> int:
@@ -249,54 +239,70 @@ def get_sort_key() -> int:
     """
     title = "Please pick a value using which you'd like to sort the spreadsheet (Hit Ctrl+C to sort by stock ticker): "
     try:
-        option, index = pick(columns()[1:], title, indicator='=>', default_index=0)
+        option, index = pick(headers[1:], title, indicator='=>', default_index=0)
         return index
     except (error, KeyboardInterrupt):
         if not (run_env := Process(getpid()).parent().name()).endswith('sh'):
-            logger.error(f"You're using {run_env} to run the script. "
-                         f"Either use a terminal or enable 'Emulate terminal in output console' under\n"
-                         f"Edit Configurations.. -> Execution in your {run_env}.")
+            root_logger.error(f"You're using {run_env} to run the script.")
+            root_logger.error("Either use a terminal or enable 'Emulate terminal in output console' under "
+                              f"Edit Configurations.. -> Execution in your {run_env}.")
+            root_logger.error("Using default index to sort the spreadsheet.")
         else:
-            logger.error(error)
+            root_logger.error(error)
+
+
+def thread_executor() -> None:
+    """Executes ``ThreadPool`` on all stock tickers with a max workers limit of 10.
+
+    Warnings:
+        More number of workers will decrease the run time but may elevate 503 errors.
+    """
+    console_logger.info(f'Instantiating multi threading to analyze {overall} NASDAQ stocks')
+    try:
+        with ThreadPoolExecutor(max_workers=10) as executor:  # multi threaded to 10 workers for throttled processing
+            list(tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
+    except ConnectionRefusedError:
+        root_logger.error('Connection has been refused.')
+    except KeyboardInterrupt:
+        root_logger.error('Manual interrupt was received.')
+    ThreadPoolExecutor().shutdown(wait=False, cancel_futures=True)
+
+
+def finalizer() -> None:
+    """Logs all the closure information and opens the spreadsheet."""
+    console_logger.info(f'Total Stocks instantiated: {overall}')
+    console_logger.info(f'Total Stocks analyzed: {analyzed}')
+    console_logger.info(f'Total Stocks failed to analyze: {overall - analyzed}')
+
+    time_taken = time_converter(round(perf_counter()))
+    console_logger.info(f'Total execution time: {time_taken}')
+    console_logger.info(f'Spreadsheet stored as {filename}')
+    system(f'open {filename}')  # opens spreadsheet post execution
 
 
 if __name__ == '__main__':
     # import in _main_ so that data and logs dir are created in advance
-    from lib.helper_functions import logger, nasdaq
+    from lib.helper_functions import logging_wrapper, nasdaq
 
+    file_logger, console_logger, root_logger = logging_wrapper()
+
+    headers = columns()  # stores all the titles into a variable
     filename = datetime.now().strftime('data/stocks_%H:%M_%d-%m-%Y.xlsx')  # creates filename with date and time
     workbook = Workbook(filename, {'strings_to_numbers': True})  # allows possible strings as numbers
     worksheet = workbook.add_worksheet('Results')  # sheet name in the workbook
     worksheet_initializer()  # initializes worksheet
     stocks = nasdaq()  # gets all the NASDAQ stock ticket values starting A to Z
-    overall = len(stocks)
+    overall = len(stocks)  # stores the number of stock tickers in a variable
+
+    # other variables initialization
     stock_map = {}  # initiates stock_map as an empty dict
-    count_404 = 0
-    printed = False
-    logger.info('Threading initialized to analyze all NASDAQ stocks')
-    print('Threading initialized to analyze all NASDAQ stocks')
-    try:
-        with ThreadPoolExecutor(max_workers=10) as executor:  # multi threaded to 10 workers for throttled processing
-            output = list(
-                tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
-    except ConnectionRefusedError:
-        pass
+    count_404 = 0  # 404 responses recorded to see if it is repeated
+    printed = False  # initiates printed as False
+
+    thread_executor()  # kicks of multi-threading
+
     sort_val = get_sort_key()
     if sort_val:
         stock_map = sort_by_value(data=stock_map, sort=sort_val)
     analyzed = writer(mapping_dict=stock_map)  # gets the number of stocks analyzed after writing to workbook
-
-    # logs and prints some closure information
-    logger.info(f'Total Stocks looked up: {overall}')
-    print(f'Total Stocks looked up: {overall}')
-    logger.info(f'Total Stocks analyzed: {analyzed}')
-    print(f'Total Stocks analyzed: {analyzed}')
-    logger.info(f'Total Stocks failed to analyze: {overall - analyzed}')
-    print(f'Total Stocks failed to analyze: {overall - analyzed}')
-
-    time_taken = time_converter(round(perf_counter()))
-    logger.info(f'Total execution time: {time_taken}')
-    print(f'Total execution time: {time_taken}')
-    logger.info(f'Spreadsheet stored as {filename}')
-    print(f'Spreadsheet stored as {filename}')
-    system(f'open {filename}')  # opens spreadsheet post execution
+    finalizer()

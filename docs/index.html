@@ -105,6 +105,12 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="thor_api.finalizer">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">finalizer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#thor_api.finalizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logs all the closure information and opens the spreadsheet.</p>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="thor_api.get_sort_key">
 <span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">get_sort_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#thor_api.get_sort_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays a menu to the user, and prompts to choose how the user likes to sort the spreadsheet.</p>
@@ -156,6 +162,16 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="thor_api.thread_executor">
+<span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">thread_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#thor_api.thread_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Executes <code class="docutils literal notranslate"><span class="pre">ThreadPool</span></code> on all stock tickers with a max workers limit of 10.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>More number of workers will decrease the run time but may elevate 503 errors.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="thor_api.time_converter">
 <span class="sig-prename descclassname"><span class="pre">thor_api.</span></span><span class="sig-name descname"><span class="pre">time_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seconds</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#thor_api.time_converter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Converts seconds to appropriate hours/minutes.</p>
@@ -191,6 +207,56 @@
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-lib.helper_functions">
+<span id="helper-functions"></span><h1>Helper Functions<a class="headerlink" href="#module-lib.helper_functions" title="Permalink to this headline">¶</a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.helper_functions.logging_wrapper">
+<span class="sig-prename descclassname"><span class="pre">lib.helper_functions.</span></span><span class="sig-name descname"><span class="pre">logging_wrapper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#lib.helper_functions.logging_wrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps logging module to create multiple handlers for different purposes.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p>fileLogger: Writes the log information only to the log file.</p></li>
+<li><p>consoleLogger: Writes the log information only in stdout.</p></li>
+<li><p>rootLogger: Logs the entry in both stdout and log file.</p></li>
+</ul>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A tuple of classes logging.Logger for file, console and root logging.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.helper_functions.nasdaq">
+<span class="sig-prename descclassname"><span class="pre">lib.helper_functions.</span></span><span class="sig-name descname"><span class="pre">nasdaq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="headerlink" href="#lib.helper_functions.nasdaq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spins up 26 threads, (one for each alphabet) and calls <code class="docutils literal notranslate"><span class="pre">ticker_gatherer</span></code> to get ticker values of that alphabet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List of stock tickers.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="lib.helper_functions.ticker_gatherer">
+<span class="sig-prename descclassname"><span class="pre">lib.helper_functions.</span></span><span class="sig-name descname"><span class="pre">ticker_gatherer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">character</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#lib.helper_functions.ticker_gatherer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gathers the stock ticker in NASDAQ. Runs on <code class="docutils literal notranslate"><span class="pre">multi-threading</span></code> which drops run time by ~7 times.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>character</strong> – ASCII character (alphabet) with which the stock ticker name starts.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -279,6 +345,7 @@
   <ul>
 <li><a class="reference internal" href="#">Welcome to Stock Analyzer’s documentation!</a></li>
 <li><a class="reference internal" href="#module-thor_api">Thor - API</a></li>
+<li><a class="reference internal" href="#module-lib.helper_functions">Helper Functions</a></li>
 <li><a class="reference internal" href="#module-thor_legacy">Thor - Legacy</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>

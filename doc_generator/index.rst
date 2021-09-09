@@ -19,6 +19,13 @@ Thor - API
    :members:
    :undoc-members:
 
+Helper Functions
+================
+
+.. automodule:: lib.helper_functions
+   :members:
+   :undoc-members:
+
 Thor - Legacy
 =============
 

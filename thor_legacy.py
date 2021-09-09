@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 from xlsxwriter import Workbook
 
-from lib.helper_functions import logger, nasdaq
+from lib.helper_functions import logging_wrapper, nasdaq
 
 log_dir = os.path.isdir('logs')
 data_dir = os.path.isdir('data')
@@ -84,14 +84,14 @@ def analyzer(stock: str) -> tuple:
         stock_map.update({stock: result})
     except (ValueError, IndexError):
         np += 1
-        logger.info(f'Unable to analyze {stock}')
+        file_logger.info(f'Unable to analyze {stock}')
     except HTTPError:
         retries += 1
         wait = retries * 30
         time.sleep(wait)
         ct = (str(threading.current_thread()))
         thread = (''.join([t for t in ct if t.isdigit()]))
-        logger.info(f'WARNING: Waiting for {wait} secs for thread: {thread} on {stock}')
+        file_logger.info(f'WARNING: Waiting for {wait} secs for thread: {thread} on {stock}')
         stuck_thread.append(stock)
     except:  # noqa: E722
         print(f'ERROR: Unhandled Exception, Saving spreadsheet. See stacktrace below:\n'
@@ -142,7 +142,7 @@ def reprocess_threads() -> int:
             stock_map.update({pending: result})
         except (ValueError, IndexError, HTTPError):
             tnp += 1
-            logger.info(f'RETRY: Unable to analyze {pending}')
+            file_logger.info(f'RETRY: Unable to analyze {pending}')
             pass
     return tnp
 
@@ -202,8 +202,8 @@ if __name__ == '__main__':
     stuck_thread = []
     stocks = nasdaq()
     overall = len(stocks)
-    logger.info('Threading initialized to analyze all NASDAQ stocks')
-    print('Threading initialized to analyze all NASDAQ stocks')
+    file_logger, console_logger, root_logger = logging_wrapper()
+    root_logger.info('Threading initialized to analyze all NASDAQ stocks')
     with ThreadPoolExecutor(max_workers=10) as executor:
         output = list(
             tqdm(executor.map(analyzer, stocks), total=overall, desc='Analyzing Stocks', unit='stock', leave=True))
@@ -218,8 +218,7 @@ if __name__ == '__main__':
     st_stocks = len(stuck_thread)
     retry_unprocessed = 0
     if st_stocks:
-        logger.info(f'Retrying {st_stocks} stocks that were not processed due to stuck threads.')
-        print(f'\nRetrying {st_stocks} stocks that were not processed due to stuck threads.')
+        root_logger.info(f'Retrying {st_stocks} stocks that were not processed due to stuck threads.')
         retry_unprocessed = reprocess_threads()
 
     writer()
@@ -228,26 +227,19 @@ if __name__ == '__main__':
 
     unprocessed = initial_unprocessed + retry_unprocessed
 
-    logger.info(f'Total Stocks looked up: {overall}')
-    print(f'Total Stocks looked up: {overall}')
-    logger.info(f'Stocks Analyzed: {analyzed}')
-    print(f'Stocks Analyzed: {analyzed}')
+    root_logger.info(f'Total Stocks looked up: {overall}')
+    root_logger.info(f'Stocks Analyzed: {analyzed}')
 
     if unprocessed:
-        print(f'Number of stocks failed to analyze: {unprocessed}')
-        logger.info(f'Number of stocks failed to analyze: {unprocessed}')
+        root_logger.info(f'Number of stocks failed to analyze: {unprocessed}')
 
     if retry:
-        print(f'Retry count: {retry}')
-        logger.info(f'Retry count: {retry}')
+        root_logger.info(f'Retry count: {retry}')
 
     retry_processed = analyzed - initial_analyzed
     if retry_processed:
-        logger.info(f'Number of stocks re-processed: {retry_processed}')
-        print(f'Number of stocks re-processed: {retry_processed}')
+        root_logger.info(f'Number of stocks re-processed: {retry_processed}')
 
     time_taken = time_converter(round(time.perf_counter()))
-    logger.info(f'Total execution time: {time_taken}')
-    print(f'Total execution time: {time_taken}')
-    logger.info(f'Spreadsheet stored as {filename}')
-    print(f'Spreadsheet stored as {filename}')
+    root_logger.info(f'Total execution time: {time_taken}')
+    root_logger.info(f'Spreadsheet stored as {filename}')
