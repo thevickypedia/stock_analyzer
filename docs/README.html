@@ -48,11 +48,16 @@
 <h2>Libraries Used<a class="headerlink" href="#libraries-used" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">ThreadPoolExecutor</span></code> - Uses a pool of threads to execute calls asynchronously</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">YFinance</span></code> - Yahoo API to request stock information for each ticker value - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py">Thor API</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">Pandas</span></code> - Retrieve tables while using web calls - <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py">Thor Legacy</a></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">BeautifulSoup</span></code> - Retrieves information in non-tables</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">YFinance</span></code> - Yahoo API to request stock information for each ticker value</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Tqdm</span></code> - Progress bar</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">Xlsxwriter</span></code> - Writes data into a spreadsheet</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">numerize</span></code> - Converts float value to understandable currency value (Example: <code class="docutils literal notranslate"><span class="pre">568153344</span></code> to <code class="docutils literal notranslate"><span class="pre">568.15M</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pick</span></code> - Lets user to, choose a value to sort the source dictionary before writing to the spreadsheet</p></li>
+</ul>
+<p><a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py">Legacy:</a></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Pandas</span></code> - Retrieve tables while using web calls</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BeautifulSoup</span></code> - Retrieves information in non-tables</p></li>
 </ul>
 </section>
 <section id="options">
@@ -89,7 +94,7 @@
 </section>
 <section id="license-copyright">
 <h2>License &amp; copyright<a class="headerlink" href="#license-copyright" title="Permalink to this headline">¶</a></h2>
-<p>© Vignesh Sivanandha Rao, Stock Analyzer</p>
+<p>© Vignesh Sivanandha Rao, <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer">Stock Analyzer</a></p>
 <p>Licensed under the <a class="reference external" href="https://github.com/thevickypedia/stock_analyzer/blob/master/LICENSE">MIT License</a></p>
 </section>
 </section>
@@ -156,7 +161,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Vignesh Sivanandha Rao.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
     </div>
   </body>
 </html>

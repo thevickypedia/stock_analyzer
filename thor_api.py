@@ -8,6 +8,7 @@ from _curses import error
 from numerize.numerize import numerize
 from pick import pick
 from psutil import Process
+from requests.exceptions import ConnectionError
 from tqdm import tqdm
 from xlsxwriter import Workbook
 from yfinance import Ticker
@@ -156,6 +157,14 @@ def analyzer(stock: str) -> None:
 
     Args:
         stock: Takes stock ticker value as argument.
+
+    See Also:
+        - Captures the number of ``404`` responses in a global variable.
+        - Exits if a ``503`` is received or if 50% requests returned a ``404``, with less than 20% of ``200`` response.
+        - ``503`` response is received only during either of the following scenarios:
+
+            - ``max_workers`` in ThreadPool is increased beyond 20.
+            - Script is run repeatedly with short intervals.
     """
     global count_404, printed
     try:
@@ -175,6 +184,8 @@ def analyzer(stock: str) -> None:
                 count_404 += 1  # increases count_404 for future handling
             file_logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
                               f'Reason: {err.reason}.')
+    except ConnectionError as conn_err:
+        file_logger.error(f'Failed to analyze {stock}.\n{conn_err}')
 
 
 def writer(mapping_dict: dict) -> int:
@@ -255,7 +266,12 @@ def thread_executor() -> None:
     """Executes ``ThreadPool`` on all stock tickers with a max workers limit of 10.
 
     Warnings:
-        More number of workers will decrease the run time but may elevate 503 errors.
+        - ``max_workers`` for ThreadPool is set to 10.
+        - Increasing the number of workers will decrease the run time but may elevate the chances of a ``503`` response.
+        - Shuts down the ThreadPool during either of the following:
+
+            - KeyboardInterrupt (manual interrupt)
+            - ConnectionRefusedError (raised by analyzer in case of a 503) exceptions.
     """
     console_logger.info(f'Instantiating multi threading to analyze {overall} NASDAQ stocks')
     try:

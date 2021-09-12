@@ -3,11 +3,15 @@ Analyze all NASDAQ stocks on [Yahoo Finance](https://finance.yahoo.com) using [Y
 
 ### Libraries Used
 - `ThreadPoolExecutor` - Uses a pool of threads to execute calls asynchronously
-- `YFinance` - Yahoo API to request stock information for each ticker value - [Thor API](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_api.py)
-- `Pandas` - Retrieve tables while using web calls - [Thor Legacy](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py)
-- `BeautifulSoup` - Retrieves information in non-tables
+- `YFinance` - Yahoo API to request stock information for each ticker value
 - `Tqdm` - Progress bar
 - `Xlsxwriter` - Writes data into a spreadsheet
+- `numerize` - Converts float value to understandable currency value (Example: `568153344` to `568.15M`)
+- `pick` - Lets user to, choose a value to sort the source dictionary before writing to the spreadsheet
+
+[Legacy:](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py)
+- `Pandas` - Retrieve tables while using web calls
+- `BeautifulSoup` - Retrieves information in non-tables
 
 ### Options
 - [Web calls - legacy](https://github.com/thevickypedia/stock_analyzer/blob/master/thor_legacy.py) - Uses web calls to https://finance.yahoo.com
@@ -38,6 +42,6 @@ Usage:
 
 ## License & copyright
 
-&copy; Vignesh Sivanandha Rao, Stock Analyzer
+&copy; Vignesh Sivanandha Rao, [Stock Analyzer](https://github.com/thevickypedia/stock_analyzer)
 
 Licensed under the [MIT License](https://github.com/thevickypedia/stock_analyzer/blob/master/LICENSE)

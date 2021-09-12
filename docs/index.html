@@ -69,6 +69,21 @@
 <dd class="field-odd"><p><strong>stock</strong> – Takes stock ticker value as argument.</p>
 </dd>
 </dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul>
+<li><p>Captures the number of <code class="docutils literal notranslate"><span class="pre">404</span></code> responses in a global variable.</p></li>
+<li><p>Exits if a <code class="docutils literal notranslate"><span class="pre">503</span></code> is received or if 50% requests returned a <code class="docutils literal notranslate"><span class="pre">404</span></code>, with less than 20% of <code class="docutils literal notranslate"><span class="pre">200</span></code> response.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">503</span></code> response is received only during either of the following scenarios:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">max_workers</span></code> in ThreadPool is increased beyond 20.</p></li>
+<li><p>Script is run repeatedly with short intervals.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -167,7 +182,18 @@
 <dd><p>Executes <code class="docutils literal notranslate"><span class="pre">ThreadPool</span></code> on all stock tickers with a max workers limit of 10.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>More number of workers will decrease the run time but may elevate 503 errors.</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_workers</span></code> for ThreadPool is set to 10.</p></li>
+<li><p>Increasing the number of workers will decrease the run time but may elevate the chances of a <code class="docutils literal notranslate"><span class="pre">503</span></code> response.</p></li>
+<li><p>Shuts down the ThreadPool during either of the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>KeyboardInterrupt (manual interrupt)</p></li>
+<li><p>ConnectionRefusedError (raised by analyzer in case of a 503) exceptions.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
 </div>
 </dd></dl>
 
@@ -264,6 +290,10 @@
 </section>
 <section id="module-thor_legacy">
 <span id="thor-legacy"></span><h1>Thor - Legacy<a class="headerlink" href="#module-thor_legacy" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p>Uses old school method using requests module to make consecutive calls to <a class="reference external" href="https://finance.yahoo.com">https://finance.yahoo.com</a>.</p></li>
+<li><p>This is unreliable (since the column IDs change frequently) and slow (since the a ton of extraction needs to be done)</p></li>
+</ul>
 <dl class="py function">
 <dt class="sig sig-object py" id="thor_legacy.analyzer">
 <span class="sig-prename descclassname"><span class="pre">thor_legacy.</span></span><span class="sig-name descname"><span class="pre">analyzer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stock</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#thor_legacy.analyzer" title="Permalink to this definition">¶</a></dt>
@@ -392,7 +422,7 @@
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Vignesh Sivanandha Rao.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.1.2.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.2.0.
     </div>
   </body>
 </html>

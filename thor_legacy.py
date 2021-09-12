@@ -1,3 +1,8 @@
+"""* Uses old school method using requests module to make consecutive calls to https://finance.yahoo.com.
+
+* This is unreliable (since the column IDs change frequently) and slow (since the a ton of extraction needs to be done)
+"""
+
 import os
 import sys
 import threading
