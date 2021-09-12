@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from os import getpid, mkdir, path, system
 from time import perf_counter
+from typing import Union
 from urllib.error import HTTPError
 
 from _curses import error
@@ -96,7 +97,7 @@ def make_float(val: int or float) -> float:
     return round(float(val), 2)
 
 
-def extract_data(data: dict) -> list:
+def extract_data(data: dict) -> Union[list, None]:
     """Extracts the necessary information of each stock from the data received.
 
     Args:
@@ -108,6 +109,9 @@ def extract_data(data: dict) -> list:
         ``Current Price``, ``Today's High Price``, ``Today's Low Price``, ``52 Week High``, ``52 Week Low``,
         ``5 Year Dividend Yield``, ``Profit Margin``, ``Industry``, ``Number of Employees``
     """
+    if not data.get('tradeable'):
+        return
+
     stock_name = data.get('shortName')
 
     cap = data.get('marketCap')
@@ -148,8 +152,13 @@ def extract_data(data: dict) -> list:
     fte = data.get('fullTimeEmployees')
     employees = numerize(fte) if fte else None
 
-    return [stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks,
-            low_52_weeks, d_yield_5y, profit_margin, industry, employees]
+    stock_data = [stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks,
+                  low_52_weeks, d_yield_5y, profit_margin, industry, employees]
+
+    if stock_name and any(stock_data):
+        return stock_data
+    else:
+        file_logger.error(f"Unable to extract necessary information for analyzing {data.get('symbol')}")
 
 
 def analyzer(stock: str) -> None:
@@ -168,7 +177,9 @@ def analyzer(stock: str) -> None:
     """
     global count_404, printed
     try:
-        stock_map.update({stock: extract_data(data=Ticker(stock).info)})
+        stock_data = extract_data(data=Ticker(stock).info)
+        if stock_data:
+            stock_map.update({stock: stock_data})
     except HTTPError as err:
         # A 503 response or 50% 404 response with only 20% processed requests indicates an IP range denial
         if err.code == 503 or (count_404 > 50 * overall / 100 and len(stock_map) < 20 * overall / 100):
