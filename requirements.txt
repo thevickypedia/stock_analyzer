@@ -8,3 +8,5 @@ bs4
 html5lib
 pick
 psutil
+beautifulsoup4
+urllib3

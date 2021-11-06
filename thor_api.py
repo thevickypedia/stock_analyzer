@@ -9,8 +9,9 @@ from _curses import error
 from numerize.numerize import numerize
 from pick import pick
 from psutil import Process
-from requests.exceptions import ConnectionError
+from requests.exceptions import ChunkedEncodingError, ConnectionError
 from tqdm import tqdm
+from urllib3.exceptions import ProtocolError
 from xlsxwriter import Workbook
 from yfinance import Ticker
 
@@ -31,12 +32,14 @@ def sort_by_value(data: dict, sort: int) -> dict:
         dict:
         Returns the dictionary which is sorted by a particular element in the list of values.
     """
-    console_logger.info(f'Spreadsheet will be sorted by {headers[1:][sort]}')
+    column_name = headers[1:][sort]
+    console_logger.info(f'Spreadsheet will be sorted by {column_name}')
     for key, value in data.items():
         if not value[sort]:
             value[sort] = 0
             data[key] = value
-    return dict(sorted(data.items(), key=lambda e: e[1][sort], reverse=True))
+    reverse_flag = False if column_name == 'Rating' else True
+    return dict(sorted(data.items(), key=lambda element: element[1][sort], reverse=reverse_flag))
 
 
 def columns() -> list:
@@ -61,7 +64,8 @@ def columns() -> list:
         "5Y Dividend Yield",
         "Profit Margin",
         "Industry",
-        "Employees"
+        "Employees",
+        "Rating"
     ]
 
 
@@ -82,6 +86,7 @@ def worksheet_initializer() -> None:
     worksheet.write(0, 12, headers[12])
     worksheet.write(0, 13, headers[13])
     worksheet.write(0, 14, headers[14])
+    worksheet.write(0, 15, headers[15])
 
 
 def make_float(val: int or float) -> float:
@@ -107,11 +112,8 @@ def extract_data(data: dict) -> Union[list, None]:
         list:
         A list of ``Stock Name``, ``Market Capital``, ``Dividend Yield``, ``PE Ratio``, ``PB Ratio``,
         ``Current Price``, ``Today's High Price``, ``Today's Low Price``, ``52 Week High``, ``52 Week Low``,
-        ``5 Year Dividend Yield``, ``Profit Margin``, ``Industry``, ``Number of Employees``
+        ``5 Year Dividend Yield``, ``Profit Margin``, ``Industry``, ``Number of Employees``, ``Recommendation Rating``
     """
-    if not data.get('tradeable'):
-        return
-
     stock_name = data.get('shortName')
 
     cap = data.get('marketCap')
@@ -152,8 +154,11 @@ def extract_data(data: dict) -> Union[list, None]:
     fte = data.get('fullTimeEmployees')
     employees = numerize(fte) if fte else None
 
+    recommendation = data.get('recommendationMean')
+    rating = float(recommendation) if recommendation else None
+
     stock_data = [stock_name, capital, dividend_yield, pe_ratio, pb_ratio, price, today_high, today_low, high_52_weeks,
-                  low_52_weeks, d_yield_5y, profit_margin, industry, employees]
+                  low_52_weeks, d_yield_5y, profit_margin, industry, employees, rating]
 
     if stock_name and any(stock_data):
         return stock_data
@@ -195,7 +200,7 @@ def analyzer(stock: str) -> None:
                 count_404 += 1  # increases count_404 for future handling
             file_logger.error(f'Failed to analyze {stock}. Faced error code {err.code} while requesting {err.url}. '
                               f'Reason: {err.reason}.')
-    except ConnectionError as conn_err:
+    except (ConnectionError, ProtocolError, ConnectionResetError, ChunkedEncodingError) as conn_err:
         file_logger.error(f'Failed to analyze {stock}.\n{conn_err}')
 
 
@@ -212,19 +217,22 @@ def writer(mapping_dict: dict) -> int:
     n = 0
     for ticker in mapping_dict:
         n = n + 1
-        worksheet.write(n, 0, f'{ticker}')
-        worksheet.write(n, 1, f'{mapping_dict[ticker][0]}')
-        worksheet.write(n, 2, f'{mapping_dict[ticker][1]}')
-        worksheet.write(n, 3, f'{mapping_dict[ticker][2]}')
-        worksheet.write(n, 4, f'{mapping_dict[ticker][3]}')
-        worksheet.write(n, 5, f'{mapping_dict[ticker][4]}')
-        worksheet.write(n, 6, f'{mapping_dict[ticker][5]}')
-        worksheet.write(n, 7, f'{mapping_dict[ticker][6]}')
-        worksheet.write(n, 8, f'{mapping_dict[ticker][7]}')
-        worksheet.write(n, 9, f'{mapping_dict[ticker][8]}')
-        worksheet.write(n, 10, f'{mapping_dict[ticker][9]}')
-        worksheet.write(n, 11, f'{mapping_dict[ticker][10]}')
-        worksheet.write(n, 12, f'{mapping_dict[ticker][11]}')
+        worksheet.write(n, 0, ticker)
+        worksheet.write(n, 1, mapping_dict[ticker][0])
+        worksheet.write(n, 2, mapping_dict[ticker][1])
+        worksheet.write(n, 3, mapping_dict[ticker][2])
+        worksheet.write(n, 4, mapping_dict[ticker][3])
+        worksheet.write(n, 5, mapping_dict[ticker][4])
+        worksheet.write(n, 6, mapping_dict[ticker][5])
+        worksheet.write(n, 7, mapping_dict[ticker][6])
+        worksheet.write(n, 8, mapping_dict[ticker][7])
+        worksheet.write(n, 9, mapping_dict[ticker][8])
+        worksheet.write(n, 10, mapping_dict[ticker][9])
+        worksheet.write(n, 11, mapping_dict[ticker][10])
+        worksheet.write(n, 12, mapping_dict[ticker][11])
+        worksheet.write(n, 13, mapping_dict[ticker][12])
+        worksheet.write(n, 14, mapping_dict[ticker][13])
+        worksheet.write(n, 15, mapping_dict[ticker][14])
     workbook.close()
     return len(mapping_dict)
 
@@ -271,6 +279,8 @@ def get_sort_key() -> int:
             root_logger.error("Using default index to sort the spreadsheet.")
         else:
             root_logger.error(error)
+        print('I AM HERE')
+        exit()
 
 
 def thread_executor() -> None:
@@ -303,8 +313,9 @@ def finalizer() -> None:
 
     time_taken = time_converter(round(perf_counter()))
     console_logger.info(f'Total execution time: {time_taken}')
-    console_logger.info(f'Spreadsheet stored as {filename}')
-    system(f'open {filename}')  # opens spreadsheet post execution
+    if analyzed:
+        console_logger.info(f'Spreadsheet stored as {filename}')
+        system(f'open {filename}')  # opens spreadsheet post execution
 
 
 if __name__ == '__main__':
@@ -326,7 +337,7 @@ if __name__ == '__main__':
     count_404 = 0  # 404 responses recorded to see if it is repeated
     printed = False  # initiates printed as False
 
-    thread_executor()  # kicks of multi-threading
+    thread_executor()  # kicks off multi-threading
 
     sort_val = get_sort_key()
     if sort_val:
