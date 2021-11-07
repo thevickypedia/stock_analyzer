@@ -1,12 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import closing
 from datetime import datetime
+from http.server import HTTPServer, SimpleHTTPRequestHandler
 from os import getpid, mkdir, path, system
+from socket import (AF_INET, SO_REUSEADDR, SOCK_DGRAM, SOCK_STREAM, SOL_SOCKET,
+                    gethostbyname, socket)
 from time import perf_counter
 from typing import Union
 from urllib.error import HTTPError
 
 from _curses import error
 from numerize.numerize import numerize
+from pandas import read_excel
 from pick import pick
 from psutil import Process
 from requests.exceptions import ChunkedEncodingError, ConnectionError
@@ -36,7 +41,7 @@ def sort_by_value(data: dict, sort: int) -> dict:
     console_logger.info(f'Spreadsheet will be sorted by {column_name}')
     for key, value in data.items():
         if not value[sort]:
-            value[sort] = 0
+            value[sort] = 999_999
             data[key] = value
     reverse_flag = False if column_name == 'Rating' else True
     return dict(sorted(data.items(), key=lambda element: element[1][sort], reverse=reverse_flag))
@@ -279,8 +284,7 @@ def get_sort_key() -> int:
             root_logger.error("Using default index to sort the spreadsheet.")
         else:
             root_logger.error(error)
-        print('I AM HERE')
-        exit()
+        exit(1)
 
 
 def thread_executor() -> None:
@@ -305,6 +309,52 @@ def thread_executor() -> None:
     ThreadPoolExecutor().shutdown(wait=False, cancel_futures=True)
 
 
+def find_free_port() -> int:
+    """Instead of binding to a specific port, ``sock.bind(('', 0))`` is used to bind to 0.
+
+    See Also:
+        - The OS will then pick an available port.
+        - The port number chosen can be found using ``sock.getsockname()[1]``
+        - Passing it on to the slaves so that they can connect back.
+        - ``sock`` is the socket that was created, returned by socket.socket.
+
+    Returns:
+        int:
+        A random port number that is free.
+    """
+    with closing(socket(AF_INET, SOCK_STREAM)) as sock:
+        sock.bind(('', 0))
+        sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+        return sock.getsockname()[1]
+
+
+def get_web_index() -> str:
+    """Fetches the IP address of the host machine.
+
+    Returns:
+        str:
+        Host IP address.
+    """
+    ip_socket = socket(AF_INET, SOCK_DGRAM)
+    ip_socket.connect(("8.8.8.8", 80))
+    if not (host := ip_socket.getsockname()[0]):
+        host = gethostbyname('localhost')
+    ip_socket.close()
+    return host
+
+
+def host_as_webpage():
+    """Converts the generated spreadsheet as an HTML file and hosts it on localserver."""
+    console_logger.info(f'Converting {filename} to an HTML file.')
+    wb_to_html = read_excel(filename)
+    wb_to_html.to_html('index.html')
+    host, port = get_web_index(), find_free_port()
+    console_logger.info(f'Hosting the analyzer results at: http://{host}:{port}')
+    server = HTTPServer(server_address=(host, port), RequestHandlerClass=SimpleHTTPRequestHandler)
+    while True:
+        server.serve_forever()
+
+
 def finalizer() -> None:
     """Logs all the closure information and opens the spreadsheet."""
     console_logger.info(f'Total Stocks instantiated: {overall}')
@@ -316,6 +366,7 @@ def finalizer() -> None:
     if analyzed:
         console_logger.info(f'Spreadsheet stored as {filename}')
         system(f'open {filename}')  # opens spreadsheet post execution
+    host_as_webpage()
 
 
 if __name__ == '__main__':
@@ -336,11 +387,9 @@ if __name__ == '__main__':
     stock_map = {}  # initiates stock_map as an empty dict
     count_404 = 0  # 404 responses recorded to see if it is repeated
     printed = False  # initiates printed as False
-
     thread_executor()  # kicks off multi-threading
 
-    sort_val = get_sort_key()
-    if sort_val:
+    if sort_val := get_sort_key():
         stock_map = sort_by_value(data=stock_map, sort=sort_val)
     analyzed = writer(mapping_dict=stock_map)  # gets the number of stocks analyzed after writing to workbook
     finalizer()

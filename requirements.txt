@@ -3,6 +3,7 @@ tqdm
 XlsxWriter
 requests
 pandas
+openpyxl
 yfinance
 bs4
 html5lib

@@ -3,4 +3,5 @@ data
 logs
 test.py
 venv
+index.html
 _build
